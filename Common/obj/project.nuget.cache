@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "DF5gbDhxtnBuL6K5WhCj60ramSjaOINtIKeK4kdkzeO30R/KKbKnT1eIZYbrOWmFUAAmKqGbYs2FaqOI7yYe1A==",
+  "success": true,
+  "projectFilePath": "E:\\Personal Projects\\SaikPOS\\Common\\Common.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\kennedy.juma\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\5.0.0\\microsoft.windowsdesktop.app.ref.5.0.0.nupkg.sha512",
+    "C:\\Users\\kennedy.juma\\.nuget\\packages\\microsoft.netcore.app.ref\\5.0.0\\microsoft.netcore.app.ref.5.0.0.nupkg.sha512",
+    "C:\\Users\\kennedy.juma\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\5.0.0\\microsoft.aspnetcore.app.ref.5.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

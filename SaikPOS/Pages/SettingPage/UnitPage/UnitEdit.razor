@@ -1,0 +1,107 @@
+﻿@page "/product/unitedit/{id}"
+@inject IUnit unit
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+@*<PageTitle>Product / UnitEdit</PageTitle>*@
+<div class="content">
+
+
+
+       
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Product</a></li>
+                <li class="active">Edit Unit</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                     <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <h4>Edit Unit </h4>
+                        </div>
+                    </div>
+                   
+                    <div class="panel-body">
+                            	<EditForm Model="@master" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Unit Name <i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.UnitName" placeholder="Unit Name">
+                                    <ValidationMessage For="@(() => master.UnitName)" />
+                                    
+                                </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Formal Name <i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.FormalName" placeholder="Formal Name">
+                                    <ValidationMessage For="@(() => master.FormalName)" />
+                                    
+                                </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">No. of. Decimal Places<i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.NoOfDecimalplaces" placeholder="No. of. Decimal Places">
+                                    <ValidationMessage For="@(() => master.NoOfDecimalplaces)" />
+                                    
+                                </div>
+                                </div>
+
+                         <div class="form-group row">
+                                   
+                                     <div class="col-sm-6 text-right">
+                                     <button type="submit" class="btn btn-success ">Save</button>
+                                      <button type="button" class="btn btn-danger" @onclick="@Cancel">Back to List</button>
+                                                    
+                                       
+                                       
+                                    </div>
+                                </div>
+                                </EditForm>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+               
+                </div>
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+    Unit master = new Unit();
+    protected async override void OnInitialized()
+    {
+        master = unit.Edit(Convert.ToInt64(id));
+    }
+    public async Task HandleValidSubmit()
+    {
+        var isCheck = unit.CheckNameId(master.UnitName);
+        if (isCheck == master.UnitId || isCheck == 0)
+        {
+            master.CompanyId = 1;
+            master.ModifyDate = DateTime.Now;
+            unit.Update(master);
+            Snackbar.Add("Updated Successfully.", Severity.Success);
+            navManager.NavigateTo("/product/unitlist");
+        }
+        else
+         {
+             Snackbar.Add("Already Exists.", Severity.Info);
+          }
+    }
+    void Cancel()
+    {
+        navManager.NavigateTo("/product/unitlist");
+    }
+    }

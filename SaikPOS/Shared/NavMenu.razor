@@ -1,0 +1,159 @@
+﻿<AuthorizeView Roles="Admin">
+    <MudNavMenu Class="mudblazor-navmenu">
+        <div class="docs-nav-fader"></div>
+        <MudNavLink Icon="@Icons.Material.Outlined.Home" Href="/">Dashboard</MudNavLink>
+        <MudNavGroup Title="Warehouse"
+                     Icon="@Icons.Material.Outlined.CallToAction"
+                     ExpandIcon="@Icons.Material.Filled.ExpandMore">
+            <MudNavLink Href="/branch/branchlist">Branch</MudNavLink>
+        </MudNavGroup>
+        <MudNavGroup Title="Products"
+                     Icon="@Icons.Material.Outlined.CallToAction"
+                     ExpandIcon="@Icons.Material.Filled.ExpandMore">
+            <MudNavLink Href="/product/productlist">Product</MudNavLink>
+            <MudNavLink Href="/product/productgrouplist">Product Group</MudNavLink>
+            <MudNavLink Href="/product/categorylist">Category</MudNavLink>
+            <MudNavLink Href="/product/unitlist">Unit</MudNavLink>
+            <MudNavLink Href="/product/currencylist">Currency</MudNavLink>
+            <MudNavLink Href="/product/arealist">Area</MudNavLink>
+            <MudNavLink Href="/product/counterlist">Counter</MudNavLink>
+            <MudNavLink Href="/product/salesmanlist">Sales Man</MudNavLink>
+            <MudNavLink Href="/product/taxlist">Tax</MudNavLink>
+        </MudNavGroup>
+        <MudNavGroup Title="Sales"
+                     Icon="@Icons.Material.Filled.ShoppingCart"
+                     ExpandIcon="@Icons.Material.Filled.ExpandMore">
+            <MudNavLink Href="/sales/customerlist">Customer</MudNavLink>
+            <MudNavLink Href="sales/salesinvoicelist">Sales Invoice</MudNavLink>
+            <MudNavLink Href="sales/salesreturnlist">Sales Return</MudNavLink>
+            <MudNavLink Href="/sales/receivecustomerlist">Payment Received</MudNavLink>
+            @*<MudNavLink Href="/sales/pos">Pos</MudNavLink>*@
+        </MudNavGroup>
+        <MudNavGroup Title="Purchase"
+                     Icon="@Icons.Material.Outlined.PointOfSale"
+                     ExpandIcon="@Icons.Material.Filled.ExpandMore">
+            <MudNavLink Href="/purchase/supplierlist">Supplier</MudNavLink>
+            <MudNavLink Href="/purchase/purchaseinvoicelist">Purchase Invoice</MudNavLink>
+            <MudNavLink Href="/purchase/purchasereturnlist">Purchase Return</MudNavLink>
+            <MudNavLink Href="/purchase/supplierpayslist">Payment Made</MudNavLink>
+        </MudNavGroup>
+        <MudNavLink Icon="@Icons.Material.Sharp.Business" Href="/income/incomevoucherlist">Income</MudNavLink>
+        <MudNavLink Icon="@Icons.Material.Filled.BusinessCenter" Href="/expenses/expensesvoucherlist">Expenses</MudNavLink>
+        <MudNavGroup Title="Accountant"
+                     Icon="@Icons.Material.Filled.AccountBalanceWallet"
+                     ExpandIcon="@Icons.Material.Filled.ExpandMore">
+            <MudNavLink Href="/account/journalvoucherlist">Journal Voucher</MudNavLink>
+            <MudNavLink Href="/account/accountgrouplist">Account Group</MudNavLink>
+            <MudNavLink Href="/account/accountledgerlist">Account Ledger</MudNavLink>
+        </MudNavGroup>
+        <MudNavGroup Title="Inventory Reports"
+                     Icon="@Icons.Material.Filled.AccountBox"
+                     ExpandIcon="@Icons.Material.Filled.ExpandMore">
+            <MudNavLink Href="/inventory/stockreports">Stock Reports</MudNavLink>
+            <MudNavLink Href="/inventory/customerledger">Customer Ledger</MudNavLink>
+            <MudNavLink Href="/inventory/customerdueledger">Customer Due Ledger</MudNavLink>
+            <MudNavLink Href="/inventory/customersalescount">Sales Count</MudNavLink>
+            <MudNavLink Href="/inventory/supplierdueledger">Supplier Due Ledger</MudNavLink>
+            <MudNavLink Href="/inventory/supplerledger">Supplier Ledger</MudNavLink>
+            <MudNavLink Href="/inventory/supplierpurchasecount">Purchase Count</MudNavLink>
+            <MudNavLink Href="/inventory/purchasereports">Purchase Report</MudNavLink>
+            <MudNavLink Href="/inventory/productstatics">Product Statisstics</MudNavLink>
+        </MudNavGroup>
+        <MudNavGroup Title="Account Reports"
+                     Icon="@Icons.Material.Filled.AccountBalanceWallet"
+                     ExpandIcon="@Icons.Material.Filled.ExpandMore">
+            <MudNavLink Href="/account/daybook">Day Book</MudNavLink>
+            <MudNavLink Href="/account/cashaccount">Cash Report</MudNavLink>
+            <MudNavLink Href="/account/bankaccount">Bank Report</MudNavLink>
+            <MudNavLink Href="/account/trailbalance">Trail Balance</MudNavLink>
+            <MudNavLink Href="/account/incomeandexpenditure">Profit & Loss</MudNavLink>
+            <MudNavLink Href="/account/balancesheet">Balance Sheet</MudNavLink>
+        </MudNavGroup>
+        <MudNavGroup Title="Setting"
+                     Icon="@Icons.Material.Filled.Settings"
+                     ExpandIcon="@Icons.Material.Filled.ExpandMore">
+            <MudNavLink Href="/setting/companylist">Company</MudNavLink>
+            <MudNavLink Href="/company/rolelist">Role</MudNavLink>
+            <MudNavLink Href="/company/userlist">Users</MudNavLink>
+            <MudNavLink Href="/setting/mailconfiguration">Email Setting</MudNavLink>
+        </MudNavGroup>
+    </MudNavMenu>
+</AuthorizeView>
+
+
+<AuthorizeView Roles="Manager">
+<MudNavMenu Class="mudblazor-navmenu">
+    <div class="docs-nav-fader"></div>
+    <MudNavLink Icon="@Icons.Material.Outlined.Home" Href="/">Dashboard</MudNavLink>
+    <MudNavGroup Title="Products"
+                 Icon="@Icons.Material.Outlined.CallToAction"
+                 ExpandIcon="@Icons.Material.Filled.ExpandMore">
+        <MudNavLink Href="/product/productlist">Product</MudNavLink>
+        <MudNavLink Href="/product/productgrouplist">Product Group</MudNavLink>
+        <MudNavLink Href="/product/categorylist">Category</MudNavLink>
+        <MudNavLink Href="/product/unitlist">Unit</MudNavLink>
+                <MudNavLink Href="/product/currencylist">Currency</MudNavLink>
+        <MudNavLink Href="/product/arealist">Area</MudNavLink>
+        <MudNavLink Href="/product/counterlist">Counter</MudNavLink>
+        <MudNavLink Href="/product/salesmanlist">Sales Man</MudNavLink>
+        <MudNavLink Href="/product/taxlist">Tax</MudNavLink>
+    </MudNavGroup>
+    <MudNavGroup Title="Sales"
+                 Icon="@Icons.Material.Filled.ShoppingCart"
+                 ExpandIcon="@Icons.Material.Filled.ExpandMore">
+        <MudNavLink Href="/sales/customerlist">Customer</MudNavLink>
+        <MudNavLink Href="sales/salesinvoicelist">Sales Invoice</MudNavLink>
+        <MudNavLink Href="/sales/receivecustomerlist">Payment Received</MudNavLink>
+        @*<MudNavLink Href="/sales/pos">Pos</MudNavLink>*@
+    </MudNavGroup>
+    <MudNavGroup Title="Purchase"
+                Icon="@Icons.Material.Outlined.PointOfSale"
+                 ExpandIcon="@Icons.Material.Filled.ExpandMore">
+        <MudNavLink Href="/purchase/supplierlist">Supplier</MudNavLink>
+        <MudNavLink Href="/purchase/purchaseinvoicelist">Purchase Invoice</MudNavLink>
+        <MudNavLink Href="/purchase/supplierpayslist">Payment Made</MudNavLink>
+    </MudNavGroup>
+    <MudNavGroup Title="Accountant"
+                 Icon="@Icons.Material.Filled.AccountBalanceWallet"
+                 ExpandIcon="@Icons.Material.Filled.ExpandMore">
+        <MudNavLink Href="/account/journalvoucherlist">Journal Voucher</MudNavLink>
+        <MudNavLink Href="/account/accountgrouplist">Account Group</MudNavLink>
+        <MudNavLink Href="/account/accountledgerlist">Account Ledger</MudNavLink>
+    </MudNavGroup>
+    <MudNavGroup Title="Setting"
+                 Icon="@Icons.Material.Filled.Settings"
+                 ExpandIcon="@Icons.Material.Filled.ExpandMore">
+        <MudNavLink Href="/setting/companylist">Company</MudNavLink>
+        <MudNavLink Href="/company/rolelist">Role</MudNavLink>
+        <MudNavLink Href="/company/userlist">Users</MudNavLink>
+        <MudNavLink Href="/setting/mailconfiguration">Email Setting</MudNavLink>
+    </MudNavGroup>
+</MudNavMenu>
+</AuthorizeView>
+
+
+
+<AuthorizeView Roles="SalesCounter">
+<MudNavMenu Class="mudblazor-navmenu">
+    <div class="docs-nav-fader"></div>
+    <MudNavLink Icon="@Icons.Material.Outlined.Home" Href="/">Dashboard</MudNavLink>
+    <MudNavGroup Title="Sales"
+                 Icon="@Icons.Material.Filled.ShoppingCart"
+                 ExpandIcon="@Icons.Material.Filled.ExpandMore">
+        <MudNavLink Href="/sales/customerlist">Customer</MudNavLink>
+        <MudNavLink Href="sales/salesinvoicelist">Sales Invoice</MudNavLink>
+        <MudNavLink Href="/sales/receivecustomerlist">Payment Received</MudNavLink>
+    </MudNavGroup>
+</MudNavMenu>
+</AuthorizeView>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

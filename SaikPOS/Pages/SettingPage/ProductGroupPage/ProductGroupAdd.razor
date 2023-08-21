@@ -1,0 +1,110 @@
+﻿@page "/product/productgorupadd"
+@inject IProductGroup productGroup
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+@*<PageTitle>Product / ProductGroup</PageTitle>*@
+<div class="content">
+
+
+
+       
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Product</a></li>
+                <li class="active">Add ProductGroup</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                     <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <h4>Add ProductGroup </h4>
+                        </div>
+                    </div>
+                   
+                    <div class="panel-body">
+                            	<EditForm Model="@master" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Product Group<i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.GroupName" placeholder="Product Group">
+                                    <ValidationMessage For="@(() => master.GroupName)" />
+                                    
+                                </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Under<i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        <select class="control-label" @bind="master.GroupUnder">
+                                          @foreach(var item in listProductgorup)
+                                    {
+                                    <option value="@item.GroupId"> @item.GroupName</option>
+
+                                    }
+                                        </select>
+                                    
+                                </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Narration:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.Narration" placeholder="Narration">
+                                    <ValidationMessage For="@(() => master.Narration)" />
+                                    
+                                </div>
+                                </div>
+                         <div class="form-group row">
+                                   
+                                     <div class="col-sm-6 text-right">
+                                     <button type="submit" class="btn btn-success ">Save</button>
+                                      <button type="button" class="btn btn-danger" @onclick="@Cancel">Back to List</button>
+                                                    
+                                       
+                                       
+                                    </div>
+                                </div>
+                                </EditForm>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+               
+                </div>
+
+@code {
+    ProductGroup master = new ProductGroup();
+    List<ProductGroup> listProductgorup;
+    protected async override void OnInitialized()
+    {
+        listProductgorup = productGroup.GetAll();
+        master.GroupUnder = 1;
+    }
+    public async Task HandleValidSubmit()
+    {
+        var isCheck = productGroup.CheckName(master.GroupName);
+            if (isCheck == true)
+            {
+                Snackbar.Add("Already Exists.", Severity.Info);
+            }
+            else
+            {
+                master.CompanyId = 1;
+                master.AddedDate = DateTime.Now;
+                productGroup.Save(master);
+                Snackbar.Add("Saved Successfully.", Severity.Success);
+                navManager.NavigateTo("/product/productgrouplist");
+            }
+    }
+    void Cancel()
+    {
+        navManager.NavigateTo("/product/productgrouplist");
+    }
+    }

@@ -1,0 +1,1004 @@
+﻿@page "/sales/pos"
+@layout PosLayout
+@inject ICartService CartService
+@inject ISalesInvoice salesInvoiceRepository
+@using Microsoft.Data.SqlClient
+@using Dapper
+@using System.Data
+@inject DatabaseConnection _conn
+@inject IInventorySetting settingRepository
+@inject ICategory category
+@inject ILocalStorageService LocalStorage
+@inject IStockPosting stockPosting
+@inject IProduct productRepository
+@inject ITax taxRepository
+@inject ISalesMan salesMan
+@inject IArea areaRepository
+@inject IUnit unitRepository
+@inject IAccountLedger ledgerRepository
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+@using Radzen
+@attribute [Authorize]
+<link rel="stylesheet" href="css/Posinvoice.css" />
+<div class="pl-3 pr-3" style="margin-top:12px;">
+    <div class="top-bar">
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="active">
+        <a href="/" role="tab" data-toggle="tab" class="home" id="new_sale">
+        Dashboard </a>
+        </li>
+    </ul>
+</div>
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="home">
+    <div class="row">
+    <div class="col-sm-12 col-md-6">
+
+    <div class="row">
+        <div class="col-xs-4 col-sm-3 col-md-4 col-lg-3 col-xl-2">
+             <div class="btn-check-group">
+                 @foreach(var item in listCategory)
+                 {
+                          <div class="btn-check">
+                              <input type="checkbox" checked="" autocomplete="off" id="all" onclick="check_category('all')">
+                              <label class="btn btn-success btn-block" for="all">
+                                <a style="cursor:pointer;" @onclick="() =>CategoryClicked(item.CategoryId)">@item.CategoryName</a>
+                              </label>
+                          </div>
+                 }
+                                                                           
+                                                
+                                                </div>
+    </div>
+    <div class="col-xs-8 col-sm-9 col-md-8 col-lg-9 col-xl-10 " id="style-3">
+
+    <div class="row search-bar">
+    <div class="col-sm-6">
+    <!-- Actual search box -->
+    <div class="form-group has-feedback has-search">
+    <Radzen.Blazor.RadzenAutoComplete Data=@listProduct TextProperty="ProductName" Change=@(args => OnChange(args, "AutoComplete")) style="width: 100%; height:30px; font-size:14px;" placeholder="Scan/Search Product by name" />
+    </div>
+    </div>
+    </div>
+   <div class="product-grid ps ps--active-x ps--active-y">
+    <div class="row row-m-3" id="product_search">
+        
+        @foreach(var item in listProduct)
+        {
+        <div class="col-xs-4 col-sm-3 col-md-4 col-lg-3 col-p-3">
+        <div class="product-panel overflow-hidden border-0 shadow-sm">
+            <div class="item-image position-relative overflow-hidden">
+@if(item.LogoPath == string.Empty)
+                                {
+                                                        <img src="img/customer.png" class="img-responsive" />
+                                }
+								else
+								{
+                                                        <img src="@item.LogoPath" class="img-responsive" @onclick="() =>ProductClicked(item.ProductId)" />
+								}
+            </div>
+            <div class="panel-footer border-0 bg-white">
+        <h3 class="item-details-title">@item.ProductName</h3>
+    </div>
+        </div>
+        </div>
+        }
+        
+        
+        
+        
+
+        </div>
+        </div>               
+</div>
+</div>
+</div>
+<div class="col-sm-12 col-md-6">
+<div class="d-flex align-items-center mb-5">
+<div class="input-group mr-3">
+<select class="form-control" @bind="master.LedgerId" @onclick="() =>LedgerClicked()">
+    <option value="0">Choose Customer</option>
+    @foreach(var item in subledger)
+    {
+  <option value="@item.LedgerId">@item.LedgerName</option>
+    }
+</select>
+</div><!-- /input-group -->
+
+<div class="d-flex align-items-center">
+<label class="mr-2 mb-0">Invoice No - <i class="text-danger"></i></label>
+<div class="invoice-no" id="gui_invoice_no">
+<input type="text" class="form-control" @bind="master.VoucherNo" readonly />
+</div>
+</div>
+</div>
+
+<div class="table-responsive guiproductdata">
+<table class="table table-bordered table-hover table-sm nowrap gui-products-table" id="addinvoice">
+<thead>
+                                                                        <tr>
+                                                                            <th scope="col">Product</th>
+                                                                            <th scope="col">Stock</th>
+                                                                            <th scope="col">Qty</th>
+                                                                            <th scope="col">Unit</th> 
+                                                                            <th scope="col">Rate</th>
+                                                                            <th scope="col">Discount</th> 
+                                                                            <th scope="col">Subtotal</th> 
+                                                                            <th scope="col" class="text-center"><i class="fa fa-trash"></i></th>
+                                                                            </tr>
+                                                                            </thead> 
+                                                                            <tbody>
+@{
+                                int sno = 0;
+                            }
+                            @if (cartItems != null && cartItems.Count > 0)
+                            {
+                                @foreach (var td in cartItems)
+                                        {
+                                    <tr role="row">
+                                        <td class=" align-middle">
+                                                <span class="">@td.ProductName  (@td.ProductCode)</span>
+                                                
+                                                <button type="button" @onclick="()=>ShowModel(td.ProductId)" class="btn btn-rounded" data-toggle="modal" data-target="#verifyModalContent2" data-whatever=""><i class="fa fa-eye"></i></button>
+                                            </td>
+                                        <td class=" align-middle">@td.CurrentStock</td>
+                                        <td class=" align-middle">
+                                            <EditForm Model="td">
+
+
+                                                <td scope="row">
+                                            <a class="btn btn-danger btn-sm btnrightalign" @onclick="() => AddToCartAsc(td)"><i class="fa fa-minus" aria-hidden="true"></i></a>
+                                             <span id="productionsetting-2-2"> <input type="number" id="quantity" @bind="td.Qty" style="width: 40px" readonly /> </span>
+                                        <a class="btn btn-info btn-sm btnleftalign" @onclick="() => AddToCartDsc(td)"><i class="fa fa-plus" aria-hidden="true"></i></a>    
+                                        </td>
+                                                              
+                                                                     </EditForm>
+                                        </td>
+                                        <td class=" align-middle">@td.UnitName</td>
+                                        <td class=" align-middle">@td.SalesRate</td>
+                                        <td class=" align-middle">@td.DiscountAmount</td>
+                                        <td class=" align-middle">
+                                          @td.TotalAmount
+                                           </td>
+                                        <td>
+                                            <a class="btn btn-danger btn-sm btnrightalign" @onclick="(() => DeleteItem(td))"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                                                                            </tbody>
+</table>
+</div>
+<div class="footer">
+<div class="form-group row guifooterpanel">
+<div class="col-sm-12">
+<label for="date" class="col-sm-6 col-lg-6 col-xl-7 col-form-label">Total:</label>
+<div class="col-sm-6 col-lg-5 col-xl-4">
+<input type="text" class="form-control" @bind="master.TotalAmount">
+</div>
+</div>
+</div>
+<div class="form-group row guifooterpanel">
+<div class="col-sm-12">
+<label for="date" class="col-sm-6 col-lg-6 col-xl-7 col-form-label">Bill Discount:</label>
+<div class="col-sm-6 col-lg-5 col-xl-4">
+    <input type="text" class="form-control gui-foot text-right" @bind="master.BillDiscount" @onkeyup="@CalculateTotal" @bind:event="oninput" autocomplete="off"></div>
+</div>
+</div>
+<div class="form-group row hiddenRow guifooterpanel collapse in" id="taxdetails" aria-expanded="true" style="">
+    <div class="col-sm-12">
+<label for="date" class="ol-sm-6 col-lg-6 col-xl-7 col-form-label">VAT:</label>
+<div class="col-sm-6 col-lg-5 col-xl-4">
+ <input id="total_tax_ammount0" tabindex="-1" class="form-control gui-foot text-right valid totalTax" @bind="master.TaxRate" @onkeyup="@CalculateTotal" @bind:event="oninput" autocomplete="off" type="text">
+</div>
+</div>
+</div>
+<div class="form-group row guifooterpanel">
+<div class="col-sm-12">
+<label for="date" class="col-sm-6 col-lg-6 col-xl-7 col-form-label">Grand Total:</label>
+<div class="col-sm-6 col-lg-5 col-xl-4">
+    <input type="text" class="form-control gui-foot text-right"@bind="master.GrandTotal" @onkeyup="@CalculateTotal" @bind:event="oninput" autocomplete="off" readonly="readonly">
+</div>
+</div>
+</div>
+
+<div class="form-group row guifooterpanel">
+<div class="col-sm-12">
+<label for="date" class="col-sm-6 col-lg-6 col-xl-7 col-form-label">Previous:</label>
+<div class="col-sm-6 col-lg-5 col-xl-4"><input type="text" class="form-control gui-foot text-right" @bind="master.PreviousDue" readonly="readonly"></div>
+</div>
+</div>
+</div>
+
+<div class="fixedclasspos">
+<div class="bottomarea">
+<div class="row">
+<div class="col-lg-8 col-xl-8">
+<div class="calculation d-lg-flex">
+<div class="cal-box d-lg-flex align-items-lg-center mr-4">
+<label class="cal-label mr-2 mb-0">Net Total:</label><span class="amount" id="net_total_text">
+    @master.NetAmounts
+    </span> 
+</div>
+<div class="cal-box d-lg-flex align-items-lg-center mr-4">
+<div class="form-inline d-inline-flex align-items-center">
+<label class="cal-label mr-2 mb-0">Grand Amount:</label>
+@master.GrandTotal
+</div>
+</div>
+<div class="cal-box d-lg-flex align-items-lg-center mr-4">
+<label class="cal-label mr-2 mb-0">Previous Due:</label><span class="amount" id="due_text">@master.PreviousDue</span>
+</div>
+</div>
+</div>
+<div class="col-lg-4 col-xl-4 text-xl-right">
+<div class="action-btns d-flex justify-content-end">
+<button type="button" class="btn btn-success btn-lg mr-2" @onclick="(() => Save())">Save</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="tab-pane fade" id="saleList">
+<div class="panel panel-default">
+<div class="panel-body">
+<div class="table-responsive padding10" id="invoic_list">
+          <div id="gui_productinfo_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer"><div class="row"><div class="col-sm-4"><div class="dataTables_length" id="gui_productinfo_length"><label>Show <select name="gui_productinfo_length" aria-controls="gui_productinfo" class="form-control input-sm select2-hidden-accessible" tabindex="-1" aria-hidden="true"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="-1">All</option></select><span class="select2 select2-container select2-container--default" dir="ltr" style="width: 75px;"><span class="selection"><span class="select2-selection select2-selection--single" role="combobox" aria-haspopup="true" aria-expanded="false" tabindex="0" aria-labelledby="select2-gui_productinfo_length-4o-container"><span class="select2-selection__rendered" id="select2-gui_productinfo_length-4o-container" title="10"><span class="select2-selection__clear">×</span>10</span><span class="select2-selection__arrow" role="presentation"><b role="presentation"></b></span></span></span><span class="dropdown-wrapper" aria-hidden="true"></span></span> entries</label></div></div><div class="col-sm-4 text-center"><div class="dt-buttons btn-group"><a class="btn btn-default buttons-copy buttons-html5 btn-sm prints" tabindex="0" aria-controls="gui_productinfo"><span>Copy</span></a><a class="btn btn-default buttons-csv buttons-html5 btn-sm prints" tabindex="0" aria-controls="gui_productinfo"><span>CSV</span></a><a class="btn btn-default buttons-excel buttons-html5 btn-sm prints" tabindex="0" aria-controls="gui_productinfo"><span>Excel</span></a><a class="btn btn-default buttons-pdf buttons-html5 btn-sm prints" tabindex="0" aria-controls="gui_productinfo"><span>PDF</span></a><a class="btn btn-default buttons-print btn-sm prints" tabindex="0" aria-controls="gui_productinfo"><span>Print</span></a></div></div><div class="col-sm-4"><div id="gui_productinfo_filter" class="dataTables_filter"><label>Search:<input type="search" class="form-control input-sm" placeholder="" aria-controls="gui_productinfo"></label></div></div></div><table id="gui_productinfo" class="table table-bordered table-hover datatable dataTable no-footer dtr-inline" role="grid">
+                                <thead>
+                                    <tr role="row"><th class="sorting_asc" tabindex="0" aria-controls="gui_productinfo" rowspan="1" colspan="1" aria-sort="ascending" aria-label="SL.: activate to sort column descending" style="width: 0px;">SL.</th><th class="sorting" tabindex="0" aria-controls="gui_productinfo" rowspan="1" colspan="1" aria-label="Invoice No: activate to sort column ascending" style="width: 0px;">Invoice No</th><th class="sorting" tabindex="0" aria-controls="gui_productinfo" rowspan="1" colspan="1" aria-label="Invoice ID: activate to sort column ascending" style="width: 0px;">Invoice ID</th><th class="sorting" tabindex="0" aria-controls="gui_productinfo" rowspan="1" colspan="1" aria-label="Customer Name: activate to sort column ascending" style="width: 0px;">Customer Name</th><th class="sorting" tabindex="0" aria-controls="gui_productinfo" rowspan="1" colspan="1" aria-label="Date: activate to sort column ascending" style="width: 0px;">Date</th><th class="sorting" tabindex="0" aria-controls="gui_productinfo" rowspan="1" colspan="1" aria-label="Total Amount: activate to sort column ascending" style="width: 0px;">Total Amount</th><th class="sorting" tabindex="0" aria-controls="gui_productinfo" rowspan="1" colspan="1" aria-label="Action: activate to sort column ascending" style="width: 0px;">Action</th></tr>
+                                </thead>
+                                <tbody id="gui_tbody">
+                                                                    <tr class="odd"><td valign="top" colspan="7" class="dataTables_empty">No data available in table</td></tr></tbody>
+                               
+                            </table><div class="dataTables_paginate paging_simple_numbers" id="gui_productinfo_paginate"><ul class="pagination"><li class="paginate_button previous disabled" id="gui_productinfo_previous"><a href="#" aria-controls="gui_productinfo" data-dt-idx="0" tabindex="0">Previous</a></li><li class="paginate_button next disabled" id="gui_productinfo_next"><a href="#" aria-controls="gui_productinfo" data-dt-idx="1" tabindex="0">Next</a></li></ul></div></div>
+
+
+
+
+
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+
+@if (isShow == true)
+{
+    <div class="modal fade modal-success in" id="myModal" style="display:block" aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+               <!-- Modal Header -->
+                <div class="modal-header">
+                    <h3 class="modal-title" style="float:left; margin-top: 14px;margin-left:10px;">@productDetails.ProductName , (@productDetails.ProductCode)</h3>
+                    <button class="close" type="button"style="margin:0px 0px 0px 0px;" @onclick="@CloseModel"><span aria-hidden="true">×</span></button>
+                </div>
+                <div class="modal-body">
+                        <div class="form-group">
+                            <label class="col-form-label" for="recipient-name-1">Rate:</label>
+                            <input class="form-control" @bind="productDetails.SalesRate" type="text" />
+                        </div>
+                        <div class="form-group">
+                            <label class="col-form-label" for="recipient-name-1">Discount Amount:</label>
+                            <input class="form-control" @bind="productDetails.DiscountAmount" type="text" />
+                        </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseModel" type="button">Close</button>
+                    <button class="btn btn-primary" @onclick="() =>AddToCart(productDetails)" type="button">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    
+}
+@code {
+    SalesMaster  master = new SalesMaster();
+    InventorySetting setting = new InventorySetting();
+    AccountLedger ledger = new AccountLedger();
+    InventorySetting settingView = new InventorySetting();
+    bool open;
+    Anchor anchor;
+    ProductView product = new ProductView();
+    CartItem productDetails = new CartItem();
+    IEnumerable<ProductView> listProduct;
+    List<AccountLedgerView> subledger = new List<AccountLedgerView>();
+    List<Category> listCategory = new List<Category>();
+    List<Tax> listTaxItem;
+    //TodoTask
+    List<CartItem> cartItems = new List<CartItem>();
+    private CartItem cartItem = new CartItem { Qty = 1 };
+    bool isShow = false;
+    string Title;
+    string strSerialNo;
+    string strPrefix;
+    string strSuffix;
+    long decVouchertypeIdSalesInvoice = 19;
+    long decVoucherReceiveId = 5;
+
+    public byte[] ImageUploaded { get; set; }
+    int counter = 1;
+    long CategoryId = 0;
+    string ProductName = string.Empty;
+    string Barcode = string.Empty;
+    protected async override void OnInitialized()
+    {
+        //CheckPriviliage
+        settingView = settingRepository.EditInventorySetting(decVouchertypeIdSalesInvoice);
+        strPrefix = settingView.Prefix;
+        strSuffix = settingView.Suffix;
+        bool collapseNavMenu = false;
+        LoadData();
+    }
+    protected async void LoadData()
+    {
+        if (settingView.VoucherNoAutomatic == true)
+        {
+            strSerialNo = salesInvoiceRepository.GetSalesvoucherNo(1, 1, decVouchertypeIdSalesInvoice);
+            master.VoucherNo = strPrefix + strSerialNo + strSuffix;
+        }
+        else
+        {
+            master.VoucherNo = string.Empty;
+            strSerialNo = "0";
+        }
+        master.Date = DateTime.Now;
+        master.NepaliDate = string.Empty;
+        master.DueDateNep = string.Empty;
+        master.InvoiceNo = string.Empty;
+        master.DueDate = DateTime.Now;
+        master.NetAmounts = 0;
+        master.TotalAmount = 0;
+        master.TaxRate = 0;
+        master.TotalTax = 0;
+        master.DisPer = 0;
+        master.BillDiscount = 0;
+        master.CashAmount = 0;
+        master.BankAmount = 0;
+        master.CreditAmount = 0;
+        master.GrandTotal = 0;
+        master.PreviousDue = 0;
+        master.Narration = string.Empty;
+        subledger = ledgerRepository.ViewAllCustomer(1); //1 is companyid
+        listProduct = productRepository.ViewAllProduct(1);//1 is companyid
+        listCategory = category.GetAll();
+        CartService.EmptyCart();
+        master.SalesManId = 1;
+        product.TaxId = 1;
+        master.TaxId = 1;
+        master.CashId = 1;
+        master.BankId = 13;
+        StateHasChanged();
+    }
+    protected async void Save()
+    {
+        //CheckNegativeStockAndNegativeLedger
+        long decProductId = 0;
+        long decBatchId = 0;
+        decimal decCalcQty = 0;
+        string strStatus = setting.NegativestockStatus;
+        bool isNegativeLedger = false;
+        DataTable dtblPurchaseMasterViewById = new DataTable();
+        if (cartItems != null)
+        {
+
+            foreach (var list in cartItems)
+            {
+                decProductId = list.ProductId;
+                if (list.BatchId > 0)
+                {
+                    decBatchId = list.BatchId;
+                }
+                decimal decCurrentStock = stockPosting.StockCheckForProductSale(decProductId, decBatchId);
+                if (list.Qty > 0)
+                {
+                    decCalcQty = decCurrentStock - list.Qty;
+                }
+                if (decCalcQty < 0)
+                {
+                    isNegativeLedger = true;
+                    break;
+                }
+            }
+            if (isNegativeLedger)
+            {
+                if (strStatus == "Warn")
+                {
+                    bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Negative Stock balance exists,Do you want to Continue?");
+                    if (confirmed)
+                    {
+                        SaveOrEdit();
+
+                    }
+                }
+                else if (strStatus == "Block")
+                {
+                    Snackbar.Add("Cannot continue ,due to negative stock balance.", Severity.Info);
+                }
+                else
+                {
+                    SaveOrEdit();
+                }
+            }
+            else
+            {
+                SaveOrEdit();
+            }
+        }
+    }
+    protected void SaveOrEdit()
+    {
+        decimal decGrand = 0;
+        decimal decCashBankAmount = 0;
+        decimal decDue = 0;
+        decGrand = master.GrandTotal;
+        decCashBankAmount = master.CashAmount + master.BankAmount;
+        decDue = decGrand - decCashBankAmount;
+        if (cartItems == null)
+        {
+            Snackbar.Add("Invalid Entry.", Severity.Info);
+        }
+        else if (master.LedgerId == 0)
+        {
+            Snackbar.Add("Choose Customer.", Severity.Info);
+        }
+        else if (master.VoucherNo == string.Empty)
+        {
+            Snackbar.Add("Type Voucherno.", Severity.Info);
+        }
+        else if (master.GrandTotal == 0)
+        {
+            Snackbar.Add("Invalid Entry.", Severity.Info);
+        }
+        else
+        {
+            var strVoucherNo = false;
+            strVoucherNo = salesInvoiceRepository.AccountSalesInvoiceNoCheckExistence(1, 1, master.VoucherNo);
+            if (strVoucherNo == false)
+            {
+                SqlConnection sqlcon = new SqlConnection(_conn.DbConn);
+                sqlcon.Open();
+                SqlTransaction sql = sqlcon.BeginTransaction();
+                var para = new DynamicParameters();
+                para.Add("@SerialNo", strSerialNo);
+                para.Add("@VoucherNo", master.VoucherNo);
+                para.Add("@InvoiceNo", master.VoucherNo);
+                para.Add("@SuffixPrefixId", 0);
+                para.Add("@Date", master.Date);
+                para.Add("@NepaliDate", master.NepaliDate);
+                para.Add("@LedgerId", master.LedgerId);
+                para.Add("@DueDate", master.DueDate);
+                para.Add("@DueDateNep", master.DueDateNep);
+                para.Add("@CreditPeriod", master.CreditPeriod);
+                para.Add("@ExchangeRateId", 1);
+                para.Add("@POS", true);
+                para.Add("@Narration", master.Narration);
+                para.Add("@SalesAccount", 10);
+                para.Add("@SalesManId", master.SalesManId);
+                para.Add("@CounterId", 1);
+                para.Add("@PricinglevelId", 1);
+                para.Add("@DeliveryNoteMasterId", 0);
+                para.Add("@OrderMasterId", 0);
+                para.Add("@QuotationMasterId", 0);
+                para.Add("@AdditionalCost", master.AdditionalCost);
+                para.Add("@CreditAmount", master.CreditAmount);
+                para.Add("@BankAmount", master.BankAmount);
+                para.Add("@CashAmount", master.CashAmount);
+                para.Add("@NetAmounts", master.NetAmounts);
+                para.Add("@TaxId", master.TaxId);
+                para.Add("@TaxRate", master.TaxRate);
+                para.Add("@TotalTax", master.TotalTax);
+                para.Add("@DisPer", master.DisPer);
+                para.Add("@BillDiscount", master.BillDiscount);
+                para.Add("@CheckDis", master.CheckDis);
+                para.Add("@GrandTotal", master.GrandTotal);
+                para.Add("@TotalAmount", master.TotalAmount);
+                para.Add("@PreviousDue", master.PreviousDue);
+                para.Add("@LrNo", master.LrNo);
+                para.Add("@TransportationCompany", master.TransportationCompany);
+                para.Add("@VoucherTypeId", decVouchertypeIdSalesInvoice);
+                para.Add("@UserId", 1);
+                para.Add("@FinancialYearId", 1);
+                para.Add("@CompanyId", 1);
+                para.Add("@CashId", master.CashId);
+                para.Add("@BankId", master.BankId);
+                para.Add("@BalanceDue", decDue);
+                if (decDue == 0)
+                {
+                    para.Add("@Status", "Paid");
+                }
+                else if (master.GrandTotal > decDue)
+                {
+                    para.Add("@Status", "Partial Paid");
+                }
+                else
+                {
+                    para.Add("@Status", "Draft");
+                }
+                para.Add("@AddedDate", DateTime.Now);
+                para.Add("@CreatedBy", 1);
+                para.Add("@MemIDOUT", dbType: DbType.Int64, direction: ParameterDirection.Output);
+                sqlcon.Execute("SalesInvoiceInsert", para, sql, 0, CommandType.StoredProcedure);
+                long MemID = para.Get<long>("MemIDOUT");
+                if (MemID > 0)
+                {
+
+                    foreach (var item in cartItems)
+                    {
+                        var paraOpening = new DynamicParameters();
+                        paraOpening.Add("@SalesMasterId", MemID);
+                        paraOpening.Add("@DeliveryNoteDetailsId", 0);
+                        paraOpening.Add("@OrderDetailsId", 0);
+                        paraOpening.Add("@QuotationDetailsId", 0);
+                        paraOpening.Add("@ProductId", item.ProductId);
+                        paraOpening.Add("@Qty", item.Qty);
+                        paraOpening.Add("@Rate", item.SalesRate);
+                        paraOpening.Add("@UnitId", item.UnitId);
+                        paraOpening.Add("@UnitConversionId", 1);
+                        paraOpening.Add("@Discount", item.Discount);
+                        paraOpening.Add("@DiscountAmount", item.DiscountAmount);
+                        if (item.TaxId == 0)
+                        {
+                            paraOpening.Add("@TaxId", 1);
+                        }
+                        else
+                        {
+                            paraOpening.Add("@TaxId", item.TaxId);
+                        }
+                        paraOpening.Add("@BatchId", item.BatchId);
+                        paraOpening.Add("@GodownId", 1);
+                        paraOpening.Add("@RackId", 1);
+                        paraOpening.Add("@TaxAmount", item.TaxAmount);
+                        paraOpening.Add("@GrossAmount", 0);
+                        paraOpening.Add("@NetAmount", item.NetAmount);
+                        paraOpening.Add("@Amount", item.TotalAmount);
+                        paraOpening.Add("@SlNo", 0);
+                        paraOpening.Add("@JourDId", dbType: DbType.Int64, direction: ParameterDirection.Output);
+                        sqlcon.Execute("SalesDetailsInsert", paraOpening, sql, 0, CommandType.StoredProcedure);
+                        long longdetailsId = paraOpening.Get<long>("JourDId");
+                        //StockPosting
+                        var parastock = new DynamicParameters();
+                        parastock.Add("@BatchId", item.BatchId);
+                        parastock.Add("@Date", master.Date);
+                        parastock.Add("@NepaliDate", master.NepaliDate);
+                        parastock.Add("@CompanyId", 1);
+                        parastock.Add("@FinancialYearId", 1);
+                        parastock.Add("@LedgerId", master.LedgerId);
+                        parastock.Add("@GodownId", 1);
+                        parastock.Add("@InwardQty", 0);
+                        parastock.Add("@OutwardQty", item.Qty);
+                        parastock.Add("@ProductId", item.ProductId);
+                        parastock.Add("@RackId", 1);
+                        parastock.Add("@Rate", item.SalesRate);
+                        parastock.Add("@UnitId", item.UnitId);
+                        parastock.Add("@DetailsId", longdetailsId);
+                        parastock.Add("@InvoiceNo", master.InvoiceNo);
+                        parastock.Add("@VoucherNo", master.VoucherNo);
+                        parastock.Add("@VoucherTypeId", decVouchertypeIdSalesInvoice);
+                        parastock.Add("@AgainstInvoiceNo", "NA");
+                        parastock.Add("@AgainstVoucherNo", "NA");
+                        parastock.Add("@AgainstVoucherTypeId", 0);
+                        parastock.Add("@StockCalculate", "Sales");
+                        parastock.Add("@AddedDate", DateTime.Now);
+                        var valuesStock = sqlcon.Query<long>("StockPostingInsert", parastock, sql, true, 0, commandType: CommandType.StoredProcedure);
+
+                    }
+                    //LedgerPosting
+                    //Customer
+                    var paraSc = new DynamicParameters();
+                    paraSc.Add("@Date", master.Date);
+                    paraSc.Add("@NepaliDate", master.NepaliDate);
+                    paraSc.Add("@LedgerId", master.LedgerId);
+                    paraSc.Add("@Debit", master.GrandTotal);
+                    paraSc.Add("@Credit", 0);
+                    paraSc.Add("@VoucherNo", master.VoucherNo);
+                    paraSc.Add("@DetailsId", MemID);
+                    paraSc.Add("@YearId", 1);
+                    paraSc.Add("@InvoiceNo", string.Empty);
+                    paraSc.Add("@VoucherTypeId", decVouchertypeIdSalesInvoice);
+                    paraSc.Add("@CompanyId", 1);
+                    paraSc.Add("@LongReference", master.Narration);
+                    paraSc.Add("@ReferenceN", master.Narration);
+                    paraSc.Add("@ChequeNo", string.Empty);
+                    paraSc.Add("@ChequeDate", string.Empty);
+                    paraSc.Add("@AddedDate", DateTime.Now);
+                    var valueSc = sqlcon.Query<long>("LedgerPostingInsert", paraSc, sql, true, 0, commandType: CommandType.StoredProcedure);
+
+                    //SalesAccount
+                    decimal decSupplierCustomerAmount = Math.Round(master.NetAmounts - master.BillDiscount, 2);
+
+                    var paraPs = new DynamicParameters();
+                    paraPs.Add("@Date", master.Date);
+                    paraPs.Add("@NepaliDate", master.NepaliDate);
+                    paraPs.Add("@LedgerId", 10);
+                    paraPs.Add("@Debit", 0);
+                    paraPs.Add("@Credit", decSupplierCustomerAmount);
+                    paraPs.Add("@VoucherNo", master.VoucherNo);
+                    paraPs.Add("@DetailsId", MemID);
+                    paraPs.Add("@YearId", 1);
+                    paraPs.Add("@InvoiceNo", string.Empty);
+                    paraPs.Add("@VoucherTypeId", decVouchertypeIdSalesInvoice);
+                    paraPs.Add("@CompanyId", 1);
+                    paraPs.Add("@LongReference", master.Narration);
+                    paraPs.Add("@ReferenceN", master.Narration);
+                    paraPs.Add("@ChequeNo", string.Empty);
+                    paraPs.Add("@ChequeDate", string.Empty);
+                    paraPs.Add("@AddedDate", DateTime.Now);
+                    var valuePs = sqlcon.Query<long>("LedgerPostingInsert", paraPs, sql, true, 0, commandType: CommandType.StoredProcedure);
+
+                    //Tax
+                    if (master.TotalTax > 0)
+                    {
+                        var paraTax = new DynamicParameters();
+                        paraTax.Add("@Date", master.Date);
+                        paraTax.Add("@NepaliDate", master.NepaliDate);
+                        paraTax.Add("@LedgerId", 14);
+                        paraTax.Add("@Debit", 0);
+                        paraTax.Add("@Credit", master.TotalTax);
+                        paraTax.Add("@VoucherNo", master.VoucherNo);
+                        paraTax.Add("@DetailsId", MemID);
+                        paraTax.Add("@YearId", 1);
+                        paraTax.Add("@InvoiceNo", string.Empty);
+                        paraTax.Add("@VoucherTypeId", decVouchertypeIdSalesInvoice);
+                        paraTax.Add("@CompanyId", 1);
+                        paraTax.Add("@LongReference", master.Narration);
+                        paraTax.Add("@ReferenceN", master.Narration);
+                        paraTax.Add("@ChequeNo", string.Empty);
+                        paraTax.Add("@ChequeDate", string.Empty);
+                        paraTax.Add("@AddedDate", DateTime.Now);
+                        var valueTax = sqlcon.Query<long>("LedgerPostingInsert", paraTax, sql, true, 0, commandType: CommandType.StoredProcedure);
+                    }
+
+                }
+                sql.Commit();
+                Snackbar.Add("Saved Successfully.", Severity.Info);
+                navManager.NavigateTo($"/sales/salesinvoicedetails/{MemID}");
+            }
+            else
+            {
+                Snackbar.Add("Voucher No Already Exit.", Severity.Info);
+            }
+        }
+    }
+    string convertImageToDisplay(byte[] image)
+    {
+        if (image != null)
+        {
+            var base64 = Convert.ToBase64String(image);
+            var finalStr = string.Format("data:image/jpg;base64,{0}", base64);
+            return finalStr;
+        }
+        return "";
+    }
+    protected async void CategoryClicked(long id)
+    {
+        listProduct = productRepository.ViewCategoryWiseProduct(id);//1 is companyid
+        StateHasChanged();
+    }
+    protected async void ProductClicked(long id)
+    {
+        var myTodoss = listProduct.FirstOrDefault(x => x.ProductId == id);
+        @if (myTodoss != null)
+        {
+            foreach(var item in cartItems)
+            {
+                if(myTodoss.ProductId == item.ProductId)
+                {
+                    Snackbar.Add("This product is already added.", Severity.Warning);
+                    return;
+                }
+            }
+            cartItem.ProductId = myTodoss.ProductId;
+            cartItem.ProductCode = myTodoss.ProductCode;
+            cartItem.ProductName = myTodoss.ProductName;
+        cartItem.Barcode = myTodoss.Barcode;
+        cartItem.UnitId = myTodoss.UnitId;
+        cartItem.BatchId = myTodoss.BatchId;
+        cartItem.SalesRate = myTodoss.SalesRate;
+        cartItem.Mrp = myTodoss.Mrp;
+        cartItem.SalesRate = myTodoss.SalesRate;
+        cartItem.Discount = myTodoss.Discount;
+        cartItem.DiscountAmount = myTodoss.DiscountAmount;
+        cartItem.TaxId = myTodoss.TaxId;
+        cartItem.TaxRate = myTodoss.TaxRate;
+        cartItem.TaxAmount = myTodoss.TaxAmount;
+        cartItem.Amount = Math.Round(1 * myTodoss.SalesRate , 2);
+        cartItem.TotalAmount = Math.Round(1 * myTodoss.SalesRate , 2);
+        cartItem.NetAmount = myTodoss.NetAmount;
+        cartItem.UnitName = myTodoss.UnitName;
+        cartItem.TaxName = myTodoss.TaxName;
+        cartItem.CurrentStock = myTodoss.CurrentStock;
+        await CartService.AddToCart(cartItem);
+        //Snackbar.Add("Successfully add to cart.", Severity.Info);
+        cartItems = await CartService.GetCartItems();
+            listProduct = productRepository.ViewAllProduct(1);
+            CalculateTotal();
+            StateHasChanged();
+        }
+        else
+        {
+            
+        }
+    }
+    protected async void OnChange(object value, string name)
+    {
+        var myTodoss = listProduct.FirstOrDefault(x => x.ProductName == value);
+        @if (myTodoss != null)
+        {
+            foreach(var item in cartItems)
+            {
+                if(myTodoss.ProductId == item.ProductId)
+                {
+                    Snackbar.Add("This product is already added.", Severity.Warning);
+                    return;
+                }
+            }
+            cartItem.ProductId = myTodoss.ProductId;
+            cartItem.ProductCode = myTodoss.ProductCode;
+            cartItem.ProductName = myTodoss.ProductName;
+        cartItem.Barcode = myTodoss.Barcode;
+        cartItem.UnitId = myTodoss.UnitId;
+        cartItem.BatchId = myTodoss.BatchId;
+        cartItem.SalesRate = myTodoss.SalesRate;
+        cartItem.Mrp = myTodoss.Mrp;
+        cartItem.SalesRate = myTodoss.SalesRate;
+        cartItem.Discount = myTodoss.Discount;
+        cartItem.DiscountAmount = myTodoss.DiscountAmount;
+        cartItem.TaxId = myTodoss.TaxId;
+        cartItem.TaxRate = myTodoss.TaxRate;
+        cartItem.TaxAmount = myTodoss.TaxAmount;
+        cartItem.Amount = Math.Round(1 * myTodoss.SalesRate , 2);
+        cartItem.TotalAmount = Math.Round(1 * myTodoss.SalesRate , 2);
+        cartItem.NetAmount = myTodoss.NetAmount;
+        cartItem.UnitName = myTodoss.UnitName;
+        cartItem.TaxName = myTodoss.TaxName;
+        cartItem.CurrentStock = myTodoss.CurrentStock;
+        await CartService.AddToCart(cartItem);
+        //Snackbar.Add("Successfully add to cart.", Severity.Info);
+        cartItems = await CartService.GetCartItems();
+            listProduct = productRepository.ViewAllProduct(1);
+            CalculateTotal();
+            StateHasChanged();
+        }
+        else
+        {
+            
+        }
+    }
+    private async Task DeleteItem(CartItem item)
+    {
+        await CartService.DeleteItem(item);
+        cartItems = await CartService.GetCartItems();
+        CalculateTotal();
+        StateHasChanged();
+    }
+    private async Task AddToCart(CartItem items)
+    {
+
+        cartItem.ProductId = items.ProductId;
+        cartItem.ProductCode = items.ProductCode;
+        cartItem.ProductName = items.ProductName;
+        cartItem.Barcode = items.Barcode;
+        cartItem.UnitId = items.UnitId;
+        cartItem.BatchId = items.BatchId;
+        cartItem.SalesRate = items.SalesRate;
+        cartItem.Mrp = items.Mrp;
+        cartItem.SalesRate = items.SalesRate;
+        cartItem.Discount = items.Discount;
+        cartItem.DiscountAmount = items.DiscountAmount;
+        cartItem.TaxId = items.TaxId;
+        cartItem.TaxRate = items.TaxRate;
+        cartItem.TaxAmount = items.TaxAmount;
+        cartItem.Amount = items.Amount;
+        cartItem.TotalAmount = items.TotalAmount;
+        cartItem.NetAmount = items.NetAmount;
+        cartItem.UnitName = items.UnitName;
+        cartItem.TaxName = items.TaxName;
+        cartItem.CurrentStock = items.CurrentStock;
+        cartItem.CartStatus = "equal";
+        await CartService.AddToCart(cartItem);
+        //Snackbar.Add("Successfully add to cart.", Severity.Info);
+        cartItems = await CartService.GetCartItems();
+        isShow = false;
+        CalculateTotal();
+        StateHasChanged();
+    }
+    private async Task AddToCartDsc(CartItem items)
+    {
+
+        cartItem.ProductId = items.ProductId;
+        cartItem.ProductCode = items.ProductCode;
+        cartItem.ProductName = items.ProductName;
+        cartItem.Barcode = items.Barcode;
+        cartItem.UnitId = items.UnitId;
+        cartItem.BatchId = items.BatchId;
+        cartItem.SalesRate = items.SalesRate;
+        cartItem.Mrp = items.Mrp;
+        cartItem.SalesRate = items.SalesRate;
+        cartItem.Discount = items.Discount;
+        cartItem.DiscountAmount = items.DiscountAmount;
+        cartItem.TaxId = items.TaxId;
+        cartItem.TaxRate = items.TaxRate;
+        cartItem.TaxAmount = items.TaxAmount;
+        cartItem.Amount = items.Amount;
+        cartItem.TotalAmount = items.TotalAmount;
+        cartItem.NetAmount = items.NetAmount;
+        cartItem.UnitName = items.UnitName;
+        cartItem.TaxName = items.TaxName;
+        cartItem.CurrentStock = items.CurrentStock;
+        cartItem.CartStatus = "Dsc";
+
+        await CartService.AddToCart(cartItem);
+        //Snackbar.Add("Successfully add to cart.", Severity.Info);
+        cartItems = await CartService.GetCartItems();
+        CalculateTotal();
+        StateHasChanged();
+    }
+    private async Task AddToCartAsc(CartItem items)
+    {
+        if (items.Qty == 1)
+        {
+
+        }
+        else
+        {
+            cartItem.ProductId = items.ProductId;
+            cartItem.ProductCode = items.ProductCode;
+            cartItem.ProductName = items.ProductName;
+            cartItem.Barcode = items.Barcode;
+            cartItem.UnitId = items.UnitId;
+            cartItem.BatchId = items.BatchId;
+            cartItem.SalesRate = items.SalesRate;
+            cartItem.Mrp = items.Mrp;
+            cartItem.SalesRate = items.SalesRate;
+            cartItem.Discount = items.Discount;
+            cartItem.DiscountAmount = items.DiscountAmount;
+            cartItem.TaxId = items.TaxId;
+            cartItem.TaxRate = items.TaxRate;
+            cartItem.TaxAmount = items.TaxAmount;
+            cartItem.Amount = items.Amount;
+            cartItem.TotalAmount = items.TotalAmount;
+            cartItem.NetAmount = items.NetAmount;
+            cartItem.UnitName = items.UnitName;
+            cartItem.TaxName = items.TaxName;
+            cartItem.CurrentStock = items.CurrentStock;
+            cartItem.CartStatus = "Asc";
+            await CartService.AddToCart(cartItem);
+            //Snackbar.Add("Successfully add to cart.", Severity.Info);
+            cartItems = await CartService.GetCartItems();
+            CalculateTotal();
+            StateHasChanged();
+        }
+    }
+    private void ShowModel(long id)
+    {
+        isShow = true;
+        Title = "Product";
+        var myTodoss = cartItems.FirstOrDefault(x => x.ProductId == id);
+        @if (myTodoss != null)
+        {
+            productDetails.ProductId = myTodoss.ProductId;
+            productDetails.ProductCode = myTodoss.ProductCode;
+            productDetails.ProductName = myTodoss.ProductName;
+        productDetails.Barcode = myTodoss.Barcode;
+        productDetails.UnitId = myTodoss.UnitId;
+         productDetails.BatchId = myTodoss.BatchId;
+        productDetails.SalesRate = myTodoss.SalesRate;
+        productDetails.Mrp = myTodoss.Mrp;
+        productDetails.SalesRate = myTodoss.SalesRate;
+        productDetails.Discount = myTodoss.Discount;
+        productDetails.DiscountAmount = myTodoss.DiscountAmount;
+        productDetails.TaxId = myTodoss.TaxId;
+        productDetails.TaxRate = myTodoss.TaxRate;
+        productDetails.TaxAmount = myTodoss.TaxAmount;
+        productDetails.Amount = Math.Round(1 * myTodoss.SalesRate , 2);
+        productDetails.TotalAmount = Math.Round(1 * myTodoss.SalesRate , 2);
+        productDetails.NetAmount = myTodoss.NetAmount;
+        productDetails.UnitName = myTodoss.UnitName;
+        productDetails.TaxName = myTodoss.TaxName;
+        productDetails.CurrentStock = myTodoss.CurrentStock;
+        }
+        else
+        {
+            
+        }
+        StateHasChanged();
+    }
+    private void CloseModel()
+    {
+        isShow = false;
+        StateHasChanged();
+    }
+    void CalculateTotal()
+    {
+        decimal decTotalAmount = 0;
+        decimal decAdditionalCost = 0;
+        decimal decTaxAmount = 0;
+        decimal decTotalDisTax = 0;
+        decimal decGrandTotalCshbnk = 0;
+        decimal decNetAmount = 0;
+        decimal decCheckTax = 0;
+        decimal decGrandTotal = 0;
+        foreach (var todo in cartItems)
+        {
+            decTotalAmount = decTotalAmount + todo.TotalAmount;
+            decNetAmount = decNetAmount + todo.NetAmount;
+            decCheckTax = decCheckTax + todo.TaxAmount;
+        }
+        master.NetAmounts = Math.Round(decNetAmount, 2);
+        master.TotalAmount = Math.Round(decTotalAmount, 2);
+        decimal decTotalAmountTax = 0;
+        decTotalAmountTax = decTotalAmount + master.TotalTax;
+        //if (master.CheckDis == "true")
+        //{
+
+            //master.BillDiscount = decTotalAmountTax * master.DisPer / 100;
+            //decTotalDisTax = decTotalAmount;
+        //}
+        //else
+        //{
+            decTotalDisTax = decTotalAmount;
+        if(master.BillDiscount > 0)
+        {
+            master.DisPer = (master.BillDiscount * 100) / (decTotalAmountTax);
+        }
+        //}
+        if (decCheckTax > 0)
+        {
+            decTaxAmount = Math.Round(decCheckTax, 2);
+            master.TotalTax = Math.Round(decCheckTax, 2);
+        }
+        else
+        {
+            decTaxAmount = decTotalDisTax * master.TaxRate / 100;
+            master.TotalTax = Math.Round(decTaxAmount, 2);
+        }
+        decimal decDiscountAmount = 0;
+        decDiscountAmount = master.BillDiscount;
+        decGrandTotal = Math.Round((decTotalDisTax + decAdditionalCost + decTaxAmount) - (decDiscountAmount), 2);
+        if (decGrandTotal >= 0)
+        {
+            master.GrandTotal = decGrandTotal;
+        }
+        else
+        {
+            master.BillDiscount = 0;
+            master.GrandTotal = decGrandTotal;
+        }
+        decGrandTotalCshbnk = master.CashAmount + master.BankAmount;
+        if (master.GrandTotal >= decGrandTotalCshbnk)
+        {
+            var decTotl = master.GrandTotal - decGrandTotalCshbnk;
+            master.CreditAmount = Math.Round(decTotl, 2);
+        }
+        else
+        {
+            master.CreditAmount = 0;
+            master.CashAmount = 0;
+            master.BankAmount = 0;
+        }
+    }
+    protected async void LedgerClicked()
+    {
+        if (master.LedgerId > 0)
+        {
+            var view = salesInvoiceRepository.CustomerSalesDue(master.LedgerId);
+            master.PreviousDue = view.DueBalance;
+        }
+        else
+        {
+            master.PreviousDue = 0;
+        }
+    }
+}

@@ -1,0 +1,266 @@
+﻿@page "/account/accountledgeredit/{id}"
+@inject IAccountLedger accountLedger
+@inject IAccountGroup accountGroup
+@inject IArea area
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+<div class="content">
+
+
+
+       
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Account</a></li>
+                <li class="active">Edit AccountLedger</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                     <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <h4>Edit AccountLedger </h4>
+                        </div>
+                    </div>
+                   
+                    <div class="panel-body">
+                            	<EditForm Model="@master" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                                <div class="form-group row">
+                                     <label for="customer_mobile" class="col-sm-2 text-right col-form-label">Ledger Name <i class="text-danger">  </i>:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           
+                                            <input type="text" @bind="master.LedgerName" class="form-control input-mask-trigger text-left" placeholder="LedgerName">
+    
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                                 <div class="form-group row">
+                                    <label for="customer_email" class="col-sm-2 text-right col-form-label">Ledger Code:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           
+                                            <input type="text" class="form-control input-mask-trigger" @bind="master.LedgerCode" placeholder="LedgerCode">
+    
+                                        </div>
+                                       
+                                    </div>
+                                      <label for="email_address" class="col-sm-2 text-right col-form-label">Account Group <i class="text-danger">  </i>:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <select class="form-control" @bind="master.AccountGroupId">
+                                               <option value="0">Choose</option>
+                                               @foreach(var item in listUnder)
+                                        {
+                                        <option value="@item.AccountGroupId">@item.AccountGroupName</option>
+
+                                        }
+                                           </select>
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="phone" class="col-sm-2 text-right col-form-label">Area:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                            <select class="form-control" @bind="master.AreaId">
+                                               @foreach(var item in listArea)
+                                        {
+                                        <option value="@item.AreaId">@item.AreaName</option>
+
+                                        }
+                                           </select>
+                                        </div>
+                                    </div>
+
+                                     <label for="contact" class="col-sm-2 text-right col-form-label">Mailing Name:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                          <input class="form-control" type="text" @bind="master.MailingName" placeholder="Mailing Name">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="address1" class="col-sm-2 text-right col-form-label">Bank Account No:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                            
+                                           <input type="text" class="form-control"  @bind="master.BankAccountNumber" placeholder="Bank Account No">
+    
+                                        </div>
+                                      
+                                    </div>
+
+                                          <label for="address2" class="col-sm-2 text-right col-form-label">Branch Name:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                            <input type="text" class="form-control"  @bind="master.BranchName" placeholder="Branch Name">
+                                        </div>
+                                      
+                                    </div>
+                                </div>
+                                <div class="form-group row"> 
+                                    <label for="fax" class="col-sm-2 text-right col-form-label">Branch Code:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="text" class="form-control"  @bind="master.BranchCode" placeholder="Branch Code">
+                                        </div>
+                                       
+                                    </div>
+                                    <label for="city" class="col-sm-2 text-right col-form-label">Phone:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="text" class="form-control"  @bind="master.Phone" placeholder="Phone">
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="state" class="col-sm-2 text-right col-form-label">Mobile:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="text" class="form-control"  @bind="master.Mobile" placeholder="Mobile">
+                                        </div>
+                                       
+                                    </div>
+                                    <label for="zip" class="col-sm-2 text-right col-form-label">Email:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="text" class="form-control"  @bind="master.Email" placeholder="Email">
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="country" class="col-sm-2 text-right col-form-label">Credit Period:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="number" class="form-control"  @bind="master.CreditPeriod">
+                                        </div>
+                                       
+                                    </div>
+                                    
+                                     <label for="previous_balance" class="col-sm-2 text-right col-form-label">Credit Limit:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="number" class="form-control"  @bind="master.CreditLimit">
+                                        </div>
+                                       
+                                    </div>
+                                                                    
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="country" class="col-sm-2 text-right col-form-label">Remarks:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <textarea type="text" class="form-control"  @bind="master.Narration"></textarea>
+                                        </div>
+                                       
+                                    </div>
+                                    
+                                     <label for="previous_balance" class="col-sm-2 text-right col-form-label">Active:</label>
+                                    @*<div class="col-sm-4">
+                                        <div class="">
+                                           <input type="checkbox" class="form-control"  @bind="master.IsDefault">
+                                        </div>
+                                       
+                                    </div>*@
+                                                                    
+                                </div>
+                         <div class="form-group row">
+                                   <div class="col-sm-6 text-right">
+                                   </div>
+                                     <div class="col-sm-6 text-right">
+                                        <div class="">
+                                           <button type="submit" class="btn btn-success ">Save</button>
+                                      <button type="button" class="btn btn-danger" @onclick="@Cancel">Back to List</button>
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                               
+
+                                </EditForm>                     </div>
+                        </div>
+                    </div>
+                </div>
+               
+                </div>
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+    AccountLedger master = new AccountLedger();
+    List<AccountGroup> listUnder = new List<AccountGroup>();
+    List<Area> listArea = new List<Area>();
+    protected async override void OnInitialized()
+    {
+        LoadData();
+    }
+    private void LoadData()
+    {
+        master = accountLedger.Edit(Convert.ToInt64(id));
+        listUnder = accountGroup.GetAll();
+        listArea = area.GetAll();
+    }
+    public void HandleValidSubmit()
+    {
+        if (master.AccountGroupId == 0)
+        {
+            Snackbar.Add("Choose AccountGroup.", Severity.Warning);
+        }
+        else
+        {
+            master.LogoPathC = string.Empty;
+            master.PricinglevelId = 1;
+            master.RouteId = 1;
+            master.SkypeID = string.Empty;
+            master.Twitter = string.Empty;
+            master.Facebook = string.Empty;
+            master.instagram = string.Empty;
+            master.Country = string.Empty;
+            master.State = string.Empty;
+            master.Mnucapality = string.Empty;
+            master.Street = string.Empty;
+            master.ZipCode = string.Empty;
+            master.Website = string.Empty;
+            master.Map = string.Empty;
+            master.Referfrom = "Previous Customer";
+            master.ModifyDate = DateTime.Now;
+            master.CompanyId = 1;
+            master.ModifyBy = 1;
+            bool isSave = false;
+            if (master.IsDefault == true)
+            {
+                Snackbar.Add("Default data cannot be delete.", Severity.Info);
+            }
+            else
+            {
+                isSave = accountLedger.Update(master);
+                if (isSave == true)
+                {
+                    Snackbar.Add("Updated Successfully.", Severity.Success);
+                    LoadData();
+                    navManager.NavigateTo("account/accountledgerlist");
+                }
+                else
+                {
+                    Snackbar.Add("Already Exists.", Severity.Info);
+                }
+            }
+        }
+    }
+    void Cancel()
+    {
+        navManager.NavigateTo("/account/accountledgerlist");
+    }
+    }

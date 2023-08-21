@@ -1,0 +1,38 @@
+﻿@inject NavigationManager navManager
+<AuthorizeView>
+    <Authorized>
+        @*<MudMenu Icon="@Icons.Material.Outlined.Translate" Color="Color.Inherit" Direction="Direction.Bottom" OffsetY="true" Dense="true">
+            <MudMenuItem>English</MudMenuItem>
+            <MudMenuItem>Swedish</MudMenuItem>
+            <MudMenuItem>Old Norse</MudMenuItem>
+        </MudMenu>*@
+        <MudMenu Direction="Direction.Left" OffsetX="true" Dense="true" Class="mt-1 ml-4">
+            <ActivatorContent>
+                <MudAvatar Image="img/profile.jpg" />
+            </ActivatorContent>
+            <ChildContent>
+                <PersonCard Class="mt-n2" />
+                <MudDivider Class="mb-2" />
+                <a href="/Identity/Account/Manage" style="margin-left:10px;">User Setting</a>
+                <a href="Identity/Account/Logout" style="margin-left:10px;">Logout</a>
+            </ChildContent>
+        </MudMenu>
+
+        @*Hello, @context.User.Identity.Name
+        <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+</MudMenu>
+ <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+    <a style="text-decoration: initial;" id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
+</MudMenu>*@
+    </Authorized>
+    <NotAuthorized>
+        <div class="inner-button" style="margin: 0 auto;width: 260px;margin-top: 174px;">
+                            <a href="Identity/Account/Login" class="btn btn-primary">Click here(Demo)</a>
+                        </div>
+        @*<a href="Identity/Account/Register">Register</a>*@
+        @*@*<a href="Identity/Account/Login">Login</a>*@
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+
+}

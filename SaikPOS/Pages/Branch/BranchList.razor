@@ -1,0 +1,114 @@
+﻿@page "/branch/branchlist"
+@inject IBranch branch
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+
+@*<PageTitle>Branch / BranchList</PageTitle>*@
+<div class="content">
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Branch</a></li>
+                <li class="active">Branch List</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                    <div class="row">
+	<div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <span>Manage Branch</span>
+                           <span class="padding-lefttitle">
+                            <a href="/branch/branchadd" class="btn btn-primary m-b-5 m-r-2"><i class="ti-plus"> </i>  Add Branch </a>
+                                               </span>
+
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table id="dataTableExample3" class="table table-bordered table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>S.No</th>
+                                        <th class="text-center">Branch Name</th>
+                                        <th class="text-center">Contact Person</th>
+                                        <th class="text-center">Phone Number</th>
+                                        <th class="text-center">Address</th>
+                                        <th class="text-center">Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                    int sno = 0;
+                                }
+                                          @foreach(var item in listModel)
+                                          {
+                                    <tr>
+                                        <td>
+                                            @{sno++;}
+                                            @sno
+                                        </td>
+                                        <td class="text-center">@item.BranchName</td>
+                                        <td class="text-center">@item.ContactPerson</td>
+                                        <td class="text-center">@item.PhoneNumber</td>
+                                        <td class="text-center">@item.Address</td>
+                                        <td class="text-center">@item.Description</td>
+                                        <td>
+                                            <center>
+                                                <a href="/branch/branchedit/@item.BranchId" class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="left" title="" data-original-title="Update">
+                                                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                                                </a>
+                                                <a @onclick="() => Delete(item.BranchId)" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="right" title="" data-original-title="Delete "><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+
+                                            </center>
+                                        </td>
+                                    </tr>
+                                    }
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+</div>                </div>
+
+@code {
+    List<Branch> listModel;
+    protected override void OnInitialized()
+    {
+        LoadData();
+    }
+    private async void LoadData()
+    {
+        listModel = branch.GetAll();
+    }
+
+    async Task Delete(long id)
+    {
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirmed)
+        {
+            if (id != 1)
+            {
+                bool isSave = false;
+                isSave = branch.Delete(id);
+                if (isSave == true)
+                {
+                    Snackbar.Add("Delete Successfully.", Severity.Success);
+                    LoadData();
+                }
+                else
+                {
+                    Snackbar.Add("Cannot be delete. already in used.", Severity.Info);
+                }
+            }
+            else
+            {
+                Snackbar.Add("Default data cannot be delete.", Severity.Info);
+            }
+        }
+    }
+}

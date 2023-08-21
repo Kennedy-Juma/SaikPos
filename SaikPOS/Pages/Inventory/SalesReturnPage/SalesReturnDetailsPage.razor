@@ -1,0 +1,213 @@
+﻿@page "/sales/salesreturndetails/{id}"
+@inject ICompany company
+@inject ISalesReturn salesInvoice
+@inject IReceiveCustomer receiveCustomer
+@inject IAccountLedger accountLedger;
+@inject IInventorySetting settingRepository
+@using System.Net;
+@using System.Text;
+@using System.Collections.Specialized;
+@using Microsoft.Data.SqlClient
+@using Dapper
+@using System.Data
+@inject DatabaseConnection _conn
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+@*<PageTitle>Purchase / PurchaseDetails</PageTitle>*@
+<div class="content">
+                <ol class="breadcrumb">
+                <li><a href="#"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="#">Sales</a></li>
+                <li class="active">SalesReturn Details</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                    
+		<div class="row">
+		    <div class="col-sm-12">
+		        <div class="panel panel-bd lobidrag">
+		            <div class="panel-heading">
+		                <div class="panel-title">
+		                    <span>SalesReturn Details</span>
+							<span class="print-button">
+                            <a href="/sales/salesreturnedit/@id" class="btn btn-success">
+            <i class="fa  fa-edit"></i> Edit
+          </a>
+          <a onclick="printDiv('PrintDiv')" class="btn btn-warning">
+              <i class="fa fa-print"></i> 
+            Print
+          </a>
+          <a href="" target="_blank" class="btn btn-primary">
+              <i class="fa fa-credit-card"></i> 
+            Email
+          </a>
+          <a href="/" class="btn btn-danger">
+            <i class="fa  fa-undo"></i> Back to list
+          </a>
+                                 </span>
+		                </div>
+		            </div>
+		            <div class="panel-body" id="PrintDiv">
+		    
+           <div class="row purchasedetails-header">
+                                
+                                <div class="col-sm-7 purchasedetails-address">
+                                <img src="img/logo.png" class="" alt="" height="70" width="80">
+                                    <br>  <br>
+                                      
+                                    <span class="label label-success-outline m-r-15 p-10">Billing From</span>
+                                    <address>
+                                        <strong class="companyname">@companyName</strong><br>
+                                        @address<br>
+                                        <abbr><b>Mobile:</b></abbr>@phone <br>
+                                        <abbr><b>Email:</b></abbr> 
+                                       SaikPOSapps@gmail.com <br>
+                                        <abbr><b>Website:</b></abbr> 
+                                       SaikPOSapps.com<br>
+                                                                                
+                                    </address>
+                                   
+                                  
+
+                                </div>
+                                
+                                 
+                                <div class="col-sm-4 text-left invoice-details-billing">
+                                    <h2 class="m-t-0">Sales</h2>
+                                    <div>Voucher No: @master.VoucherNo</div>
+                                    <div class="m-b-15">Billing Date: @master.Date</div>
+
+                                    <span class="label label-success-outline m-r-15">Billing To</span>
+
+                                    <address class="details-address">  
+                                        <strong class="companyname">@master.LedgerName </strong><br>
+                                       
+                                    </address>
+                                </div>
+                            </div> 
+
+                          <br>
+
+
+		                <div class="table-responsive paddin5ps">
+		                    <table class="table table-bordered table-striped table-hover">
+								<thead>
+									<tr>
+										<th style="width:30px;">S.No</th>
+                                <th>Product Name</th>
+                                <th>Unit</th>
+                                <th class="text-right">Qty</th>
+                                <th class="text-right">Rate</th>
+                                <th class="text-right">Discount</th>
+                                <th class="text-right">Total Amount</th>
+									</tr>
+								</thead>
+								<tbody>
+                                        @{
+                                int sno = 0;
+                            }
+                            @foreach (var td in TodoList)
+                            {
+                                <tr valign="top">
+                                    <td>
+                                        @{sno++;}
+                                        @sno
+                                    </td>
+                                    <td>
+                                        @td.ProductName<br>
+
+                                    </td>
+                                    <td>@td.UnitName</td>
+                                    <td align="right">@td.Qty</td>
+                                    <td class="text-right">@td.Rate</td>
+                                        <td align="right">@td.DiscountAmount</td>
+                                    <td align="right">@td.TotalAmount </td>
+                                </tr>
+                            }
+								
+																</tbody>
+								<tfoot>
+									<tr>
+										<td class="text-right" colspan="6"><b>Total:</b></td>
+										<td class="text-right"><b>@master.TotalAmount</b></td>
+									</tr>
+                                    <tr>
+										<td class="text-right" colspan="6"><b>Bill Discount:</b></td>
+										<td class="text-right"><b>@master.BillDiscount</b></td>
+									</tr>
+                                    <tr>
+										<td class="text-right" colspan="6"><b>Vat:</b></td>
+										<td class="text-right"><b>@master.TotalTax</b></td>
+									</tr>
+									 									<tr>
+										<td class="text-right" colspan="6"><b>Grand Total:</b></td>
+										<td class="text-right"><b>@master.GrandTotal</b></td>
+									</tr>
+									                               									<tr>
+										<td class="text-right" colspan="6"><b>Due Amount:</b></td>
+										<td class="text-right"><b>@balanceDue</b></td>
+									</tr>
+																</tfoot>
+		                    </table>
+		                </div>
+                        <div class="row">
+                    <div class="col-lg-12">
+                        @master.Narration
+                    </div>
+                </div>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+	                </div>
+
+
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+    InventorySetting setting = new InventorySetting();
+    SalesReturnMasterView master = new SalesReturnMasterView();
+    List<ProductView> TodoList = new List<ProductView>();
+    ReceiptMaster payment = new ReceiptMaster();
+    List<AccountLedger> listCash = new List<AccountLedger>();
+    List<AccountLedger> listBank = new List<AccountLedger>();
+    List<ReceiptMaster> listPayment = new List<ReceiptMaster>();
+    string billtype;
+    long decVouchertypeIdSalesInvoice = 20;
+    long decVoucherReceiveId = 5;
+    bool showPay = false;
+    bool showModal = false;
+    string strSerialNo;
+    string strPrefix;
+    string strSuffix;
+    decimal decTotal = 0;
+    decimal PreviousDue = 0;
+    decimal paymentMade = 0;
+    decimal balanceDue = 0;
+    string companyName;
+    string address;
+    string phone;
+
+    protected async override void OnInitialized()
+    {
+        var resultCompany = company.Edit(1);
+        companyName = resultCompany.CompanyName;
+        address = resultCompany.Address;
+        phone = resultCompany.Phone;
+        billtype = "Sales Return";
+        LoadData();
+    }
+    private void LoadData()
+    {
+        master = salesInvoice.SalesMasterPrint(Convert.ToInt64(id));
+        TodoList = salesInvoice.SalesDetailsPrint(Convert.ToInt64(id));
+    }
+    private void Print()
+    {
+        JsRuntime.InvokeVoidAsync("Print");
+    }
+}

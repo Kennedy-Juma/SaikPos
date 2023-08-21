@@ -1,0 +1,528 @@
+﻿@page "/expenses/expensesvoucheredit/{id}"
+@inject ILocalStorageService sessionStorage
+@using Radzen
+@using Microsoft.EntityFrameworkCore.Storage
+@using Microsoft.Data.SqlClient;
+@using Dapper
+@using System.Data
+@inject DatabaseConnection _conn
+@inject IAccountLedger ledger
+@inject IInventorySetting settingRepository
+@inject ExpensesVoucherRepository expenVoucher
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+@using BlazorInputFile
+<div class="content">
+
+
+
+       
+                <ol class="breadcrumb">
+                <li><a href="#"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="#">Expenses</a></li>
+                <li class="active">Expenses Voucher</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="panel panel-bd lobidrag">
+            <div class="panel-heading">
+                <div class="panel-title">
+                    <h4>
+                     Expenses Voucher                    </h4>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="col-sm-4 invoice-col">
+                    <label for="inputEmail3" class="">Voucher No</label>
+                    <address>
+
+                        <div class="form-group">
+                            <input type="text" @bind="mster.VoucherNo" readonly class="form-control" />
+                        </div>
+                    </address>
+                </div>
+                <!-- /.col -->
+                <div class="col-sm-4 invoice-col">
+                    <label for="inputEmail3" class="">Date</label>
+                    <address>
+
+                        <div class="form-group">
+                            @if (setting.DeactiveDate == true)
+                            {
+                                <input type="date" @bind-value="mster.Date" readonly class="form-control" />
+                            }
+                            else
+                            {
+                                <input type="date" @bind-value="mster.Date" class="form-control" />
+                            }
+                        </div>
+                    </address>
+                </div>
+            </div>
+
+            <!-- info row -->
+                <div class="table-responsive">
+                    <table id="myTable" class="table table-bordered table-hover" aria-describedby="myTable_info" role="grid">
+                        <thead>
+                        <tr>
+                            <td>S.No</td>
+                            <td>Expenses</td>
+                            <td>Description</td>
+                            <td>Amount</td>
+                            <td></td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @for (var i = 0; i < mster.Addresses.Count; i++)
+                        {
+                            var index = i;
+                            var address = mster.Addresses[i];
+
+                            <tr>
+                                <td>
+                                    @(i+1)
+                                </td>
+                                <td>
+                                    <select class="form-control" @bind="address.LedgerId" style="width:300px;">
+                                        <option value="0">Choose Expenses</option>
+                                        @foreach(var item in listLedger)
+                                            {
+                                                <option value="@item.LedgerId">@item.LedgerName</option>
+                                            }
+                                        </select>
+                                </td>
+                                <td>
+                                    <input type="text" @bind="address.Description" class="form-control" />
+                                </td>
+                                <td>
+                                    <input type="text" @bind="address.Amount" class="form-control" @onkeyup="Calculate" @bind:event="oninput" />
+                                </td>
+                                <td>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" @onclick="@(() => Remove(index))"></MudIconButton>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                        <tfoot>
+                                    <tr>
+                                        <td colspan="5">
+                                            <a id="add_more" class="btn btn-info" name="add_more" @onclick="@(() =>AddJournal())"><i class="fa fa-plus"></i></a>
+                                            </td>
+                                    </tr>
+                                </tfoot>
+                    </table>
+                </div>
+                <!-- /.col -->
+            <!-- /.row -->
+
+            <div class="row">
+                <!-- accepted payments column -->
+                <div class="col-xs-5">
+
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        Customer
+                                        <select class="form-control" @bind="mster.LedgerId" style="width:300px;">
+                                        <option value="0">Choose Customer</option>
+                                        @foreach(var item in listSupCus)
+                                            {
+                                                <option value="@item.LedgerId">@item.LedgerName</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td>
+                                        Amount
+                                        <input type="text" @bind="mster.CreditAmount" class="form-control" @onkeyup="@CalculateTotal" @bind:event="oninput" autocomplete="off" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Cash<select @bind="mster.CashId" class="form-control">
+                                            @foreach (var item in listCash)
+                                            {
+                                                <option value="@item.LedgerId">@item.LedgerName</option>
+                                            }
+
+                                        </select>
+                                    </td>
+                                    <td>
+                                        Amount
+                                        <input type="text" @bind="mster.CashAmount" class="form-control" @onkeyup="@CalculateTotal" @bind:event="oninput" autocomplete="off" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Bank / Cheque <select @bind="mster.BankId" class="form-control">
+                                            @foreach (var item in listBank)
+                                            {
+                                                <option value="@item.LedgerId">@item.LedgerName</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td>
+                                        Amount<input type="text" @bind="mster.BankAmount" class="form-control" @onkeyup="@CalculateTotal" @bind:event="oninput" autocomplete="off" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p style="margin-top: 10px; margin-left:10px;">
+                            Description
+                            <input type="text" @bind="mster.Narration" class="form-control" />
+                        </p>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </div>
+                <!-- /.col -->
+                <div class="col-xs-3">
+                    <p class="lead"></p>
+                    <div class="table-responsive">
+                        <table class="table" style="float:right;">
+                            <tbody>
+                                <tr>
+                                    <th style="width:40%">Total Amount</th>
+                                    <td>
+                                        <input type="number" readonly @bind="mster.Amount" class="form-control" @onkeyup="@CalculateTotal" @bind:event="oninput" autocomplete="off" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- this row will not appear when printing -->
+            <div class="row no-print">
+                <div class="col-xs-12">
+                    <button type="button" class="btn btn-success" @onclick="(() => Save())">Save</button>
+                    <button type="button" class="btn btn-danger" @onclick=@Cancel>Cancel</button>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+</div>
+@code {
+    [Parameter]
+    public string id { get; set; }
+    InventorySetting setting = new InventorySetting();
+    ExpenseMaster mster = new ExpenseMaster();
+    IncomeExpenditureView product = new IncomeExpenditureView();
+    List<AccountLedger> listLedger = new List<AccountLedger>();
+    List<AccountLedgerView> listSupCus = new List<AccountLedgerView>();
+    List<AccountLedger> listCash = new List<AccountLedger>();
+    List<AccountLedger> listBank = new List<AccountLedger>();
+    //GetSessionInfo
+    long decExpensiveVoucherTypeId = 29;
+    string strSerialNo;
+    string strPrefix;
+    string strSuffix;
+    long editedID = 0;
+    bool showModal = false;
+    private bool readOnly;
+    protected async override void OnInitialized()
+    {
+        setting = settingRepository.EditInventorySetting(decExpensiveVoucherTypeId);
+        strPrefix = setting.Prefix;
+        strSuffix = setting.Suffix;
+        LoadData();
+        StateHasChanged();
+    }
+    protected void LoadData()
+    {
+        mster = expenVoucher.EditExpenseMaster(Convert.ToInt64(id));
+        mster.Addresses = expenVoucher.ViewExpenditureDetails(Convert.ToInt64(id));
+        listLedger = expenVoucher.EpensiveComboFill(1);
+        listSupCus = ledger.ViewAllSupplier(1);
+        listCash = ledger.GetCashFill();
+        listBank = ledger.GetBankFill();
+    }
+    protected void Save()
+    {
+            decimal decGrandTotalCshbnk = 0;
+            decGrandTotalCshbnk = Math.Round(mster.CashAmount + mster.BankAmount + mster.CreditAmount, 2);
+            if (mster.Addresses == null)
+            {
+                Snackbar.Add("Invalid Entry.", Severity.Info);
+            }
+            else if (decGrandTotalCshbnk != mster.Amount)
+            {
+                Snackbar.Add("Invalid Entry.", Severity.Info);
+            }
+            else if (mster.VoucherNo == "")
+            {
+                Snackbar.Add("Type voucher no.", Severity.Info);
+            }
+            else if (mster.Date == null)
+            {
+                Snackbar.Add("Invalid Date.", Severity.Info);
+            }
+            else if (mster.CreditAmount > 0 && mster.LedgerId == 0)
+            {
+                Snackbar.Add("Choose Customer.", Severity.Info);
+            }
+            else if (mster.BankAmount > 0 && mster.BankId == 0)
+            {
+                Snackbar.Add("Choose Bank.", Severity.Info);
+            }
+            else if (mster.CashAmount > 0 && mster.CashId == 0)
+            {
+                Snackbar.Add("Choose Cash.", Severity.Info);
+            }
+            else if (mster.Amount == 0)
+            {
+                Snackbar.Add("Invalid Entry.", Severity.Info);
+            }
+            else
+            {
+                SqlConnection sqlcon = new SqlConnection(_conn.DbConn);
+                sqlcon.Open();
+                SqlTransaction sql = sqlcon.BeginTransaction();
+                var para = new DynamicParameters();
+                para.Add("@ExpensiveMasterId", mster.ExpensiveMasterId);
+                para.Add("@SerialNo", mster.SerialNo);
+                para.Add("@VoucherNo", mster.VoucherNo);
+                para.Add("@InvoiceNo", mster.VoucherNo);
+                para.Add("@SuffixPrefixId", 0);
+                para.Add("@Date", mster.Date);
+                para.Add("@NepaliDate", mster.NepaliDate);
+                para.Add("@Amount", mster.Amount);
+                para.Add("@LedgerId", mster.LedgerId);
+                para.Add("@CreditAmount", mster.CreditAmount);
+                para.Add("@BankId", mster.BankId);
+                para.Add("@BankAmount", mster.BankAmount);
+                para.Add("@CashId", mster.CashId);
+                para.Add("@CashAmount", mster.CashAmount);
+                para.Add("@VoucherTypeId", decExpensiveVoucherTypeId);
+                para.Add("@Narration", mster.Narration);
+                para.Add("@SuffixPrefixId", 0);
+                para.Add("@UserId", mster.UserId);
+                para.Add("@FinancialYearId", 1);
+                para.Add("@CompanyId", 1);
+                para.Add("@ModifyDate", DateTime.Now);
+                para.Add("@ModifyBy", 1);
+                sqlcon.Execute("ExpenseMasterUpdate", para, sql, 0, CommandType.StoredProcedure);
+
+
+                //DeleteExpensesVoucher
+                var paraScDelete = new DynamicParameters();
+                paraScDelete.Add("@DetailsId", mster.ExpensiveMasterId);
+                paraScDelete.Add("@VoucherTypeId", decExpensiveVoucherTypeId);
+                var valueScDelete = sqlcon.Query<long>("DELETE FROM LedgerPosting where DetailsId=@DetailsId AND VoucherTypeId=@VoucherTypeId", paraScDelete, sql, true, 0, commandType: CommandType.Text);
+                //DeleteExpenseDetails
+                var paraScDeleteExpenseDetails = new DynamicParameters();
+                paraScDeleteExpenseDetails.Add("@ExpensiveMasterId", mster.ExpensiveMasterId);
+                var valueScDeleteExpense = sqlcon.Query<long>("DELETE FROM ExpenseDetails where ExpensiveMasterId=@ExpensiveMasterId", paraScDeleteExpenseDetails, sql, true, 0, commandType: CommandType.Text);
+                //DeletePaymentVoucher
+                foreach (var item in mster.Addresses)
+                {
+                    if (item.LedgerId > 0)
+                    {
+                        //if (item.ExpensiveMasterId == 0)
+                        //{
+                        var paraOpening = new DynamicParameters();
+                        paraOpening.Add("@ExpensiveMasterId", mster.ExpensiveMasterId);
+                        paraOpening.Add("@LedgerId", item.LedgerId);
+                        paraOpening.Add("@Description", item.Description);
+                        paraOpening.Add("@Amount", item.Amount);
+                        paraOpening.Add("@TaxId", 1);
+                        paraOpening.Add("@Rate", 0);
+                        paraOpening.Add("@JourDId", dbType: DbType.Int64, direction: ParameterDirection.Output);
+                        sqlcon.Execute("ExpenseDetailsAdd", paraOpening, sql, 0, CommandType.StoredProcedure);
+                        long journaldetId = paraOpening.Get<long>("JourDId");
+
+                        //ExpenseLedgerPosting
+                        var paraLedger = new DynamicParameters();
+                        paraLedger.Add("@Date", mster.Date);
+                        paraLedger.Add("@NepaliDate", mster.NepaliDate);
+                        paraLedger.Add("@LedgerId", item.LedgerId);
+                        paraLedger.Add("@Debit", item.Amount);
+                        paraLedger.Add("@Credit", 0);
+                        paraLedger.Add("@VoucherNo", mster.VoucherNo);
+                        paraLedger.Add("@DetailsId", mster.ExpensiveMasterId);
+                        paraLedger.Add("@YearId", 1);
+                        paraLedger.Add("@InvoiceNo", mster.VoucherNo);
+                        paraLedger.Add("@VoucherTypeId", decExpensiveVoucherTypeId);
+                        paraLedger.Add("@CompanyId", 1);
+                        paraLedger.Add("@LongReference", mster.Narration);
+                        paraLedger.Add("@ReferenceN", item.Description);
+                        paraLedger.Add("@ChequeNo", string.Empty);
+                        paraLedger.Add("@ChequeDate", string.Empty);
+                        paraLedger.Add("@AddedDate", DateTime.Now);
+                        var value = sqlcon.Query<long>("LedgerPostingInsert", paraLedger, sql, true, 0, commandType: CommandType.StoredProcedure);
+                        //}
+                        //else
+                        //{
+                        //    var paraOpening = new DynamicParameters();
+                        //    paraOpening.Add("@ExpensiveDetailsId", item.ExpensiveDetailsId);
+                        //    paraOpening.Add("@ExpensiveMasterId", mster.ExpensiveMasterId);
+                        //    paraOpening.Add("@LedgerId", item.LedgerId);
+                        //    paraOpening.Add("@Description", item.Description);
+                        //    paraOpening.Add("@Amount", item.Amount);
+                        //    paraOpening.Add("@TaxId", 1);
+                        //    paraOpening.Add("@Rate", 0);
+                        //    sqlcon.Execute("ExpenseDetailsUpdate", paraOpening, sql, 0, CommandType.StoredProcedure);
+                        //}
+                    }
+
+                }
+
+                //ExpenseLedger
+                if (mster.LedgerId > 0)
+                {
+                    var paraScSupplier = new DynamicParameters();
+                    paraScSupplier.Add("@Date", mster.Date);
+                    paraScSupplier.Add("@NepaliDate", mster.NepaliDate);
+                    paraScSupplier.Add("@LedgerId", mster.LedgerId);
+                    paraScSupplier.Add("@Debit", 0);
+                    paraScSupplier.Add("@Credit", mster.CreditAmount);
+                    paraScSupplier.Add("@VoucherNo", mster.VoucherNo);
+                    paraScSupplier.Add("@DetailsId", mster.ExpensiveMasterId);
+                    paraScSupplier.Add("@YearId", 1);
+                    paraScSupplier.Add("@InvoiceNo", mster.InvoiceNo);
+                    paraScSupplier.Add("@VoucherTypeId", decExpensiveVoucherTypeId);
+                    paraScSupplier.Add("@CompanyId", 1);
+                    paraScSupplier.Add("@LongReference", mster.Narration);
+                    paraScSupplier.Add("@ReferenceN", mster.Narration);
+                    paraScSupplier.Add("@ChequeNo", string.Empty);
+                    paraScSupplier.Add("@ChequeDate", string.Empty);
+                    paraScSupplier.Add("@AddedDate", DateTime.Now);
+                    var valueScSupplier = sqlcon.Query<long>("LedgerPostingInsert", paraScSupplier, sql, true, 0, commandType: CommandType.StoredProcedure);
+                }
+                //Cash
+                if (mster.CashAmount > 0)
+                {
+                    var paraCash = new DynamicParameters();
+                    paraCash.Add("@Date", mster.Date);
+                    paraCash.Add("@NepaliDate", mster.NepaliDate);
+                    paraCash.Add("@LedgerId", mster.CashId);
+                    paraCash.Add("@Debit", 0);
+                    paraCash.Add("@Credit", mster.CashAmount);
+                    paraCash.Add("@VoucherNo", mster.VoucherNo);
+                    paraCash.Add("@DetailsId", mster.ExpensiveMasterId);
+                    paraCash.Add("@YearId", 1);
+                    paraCash.Add("@InvoiceNo", mster.InvoiceNo);
+                    paraCash.Add("@VoucherTypeId", decExpensiveVoucherTypeId);
+                    paraCash.Add("@CompanyId", 1);
+                    paraCash.Add("@LongReference", mster.Narration);
+                    paraCash.Add("@ReferenceN", mster.Narration);
+                    paraCash.Add("@ChequeNo", string.Empty);
+                    paraCash.Add("@ChequeDate", string.Empty);
+                    paraCash.Add("@AddedDate", DateTime.Now);
+                    var valueCash = sqlcon.Query<long>("LedgerPostingInsert", paraCash, sql, true, 0, commandType: CommandType.StoredProcedure);
+                }
+                //Bank
+                if (mster.BankAmount > 0)
+                {
+                    var paraBank = new DynamicParameters();
+                    paraBank.Add("@Date", mster.Date);
+                    paraBank.Add("@NepaliDate", mster.NepaliDate);
+                    paraBank.Add("@LedgerId", mster.BankId);
+                    paraBank.Add("@Debit", 0);
+                    paraBank.Add("@Credit", mster.BankAmount);
+                    paraBank.Add("@VoucherNo", mster.VoucherNo);
+                    paraBank.Add("@DetailsId", mster.ExpensiveMasterId);
+                    paraBank.Add("@YearId", 1);
+                    paraBank.Add("@InvoiceNo", mster.InvoiceNo);
+                    paraBank.Add("@VoucherTypeId", decExpensiveVoucherTypeId);
+                    paraBank.Add("@CompanyId", 1);
+                    paraBank.Add("@LongReference", mster.Narration);
+                    paraBank.Add("@ReferenceN", mster.Narration);
+                    paraBank.Add("@ChequeNo", string.Empty);
+                    paraBank.Add("@ChequeDate", string.Empty);
+                    paraBank.Add("@AddedDate", DateTime.Now);
+                    var valueBank = sqlcon.Query<long>("LedgerPostingInsert", paraBank, sql, true, 0, commandType: CommandType.StoredProcedure);
+                }
+                sql.Commit();
+                Snackbar.Add("Updated Successfully.", Severity.Success);
+                navManager.NavigateTo("/expenses/expensesvoucherlist");
+            }
+    }
+    void Calculate()
+    {
+        decimal decAmount = 0;
+        @for (var i = 0; i < mster.Addresses.Count; i++)
+        {
+            var address = mster.Addresses[i];
+            decAmount = decAmount + address.Amount;
+        }
+        mster.Amount = Math.Round(decAmount, 1);
+    }
+    void Remove(int index)
+    {
+        if (index > 0)
+        {
+            mster.Addresses.RemoveAt(index);
+            decimal decAmount = 0;
+            @for (var i = 0; i < mster.Addresses.Count; i++)
+            {
+                var address = mster.Addresses[i];
+                decAmount = decAmount + address.Amount;
+            }
+            mster.Amount = Math.Round(decAmount, 1);
+        }
+        else
+        {
+            Snackbar.Add("Default value cannot be delete.", Severity.Info);
+        }
+    }
+    void AddJournal()
+    {
+        decimal decAmount = 0;
+        @for (var i = 0; i < mster.Addresses.Count; i++)
+        {
+
+            if (mster.Addresses[i].LedgerId == 0)
+            {
+                Snackbar.Add("Choose Expense.", Severity.Info);
+            }
+            else
+            {
+                mster.Addresses.Add(new ExpenseDetails());
+                var address = mster.Addresses[i];
+                decAmount = decAmount + address.Amount;
+            }
+        }
+        mster.Amount = Math.Round(decAmount, 1);
+    }
+    void CalculateTotal()
+    {
+        decimal decGrandTotalCshbnk = 0;
+        decimal decNetAmount = 0;
+        decimal decGrandTotal = 0;
+        decNetAmount = mster.Amount;
+        decGrandTotal = Math.Round(decNetAmount, 1);
+        decGrandTotalCshbnk = Math.Round(mster.CashAmount + mster.BankAmount + mster.CreditAmount, 1);
+        if (mster.Amount >= decGrandTotalCshbnk)
+        {
+            //mster.CreditAmount = 0;
+            //mster.CashAmount = 0;
+            //mster.BankAmount = 0;
+        }
+        else
+        {
+            mster.CreditAmount = 0;
+            mster.CashAmount = 0;
+            mster.BankAmount = 0;
+        }
+    }
+    void Cancel()
+    {
+        navManager.NavigateTo("/expenses/expensesvoucherlist");
+    }
+}

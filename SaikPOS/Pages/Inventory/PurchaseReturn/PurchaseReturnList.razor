@@ -1,0 +1,209 @@
+﻿@page "/purchase/purchasereturnlist"
+@inject IPurchaseReturn purchaseInvoice
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@using NPOI.SS.UserModel
+@using NPOI.XSSF.UserModel
+@inject ISnackbar Snackbar
+
+<div class="content">
+
+
+
+       
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Purchase Return</a></li>
+        <li class="active">Manage Purchase Return</li>
+            </ol>
+
+
+
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                    			
+		        <div class="panel panel-default">
+		            <div class="panel-body">
+                            <div class="col-sm-7">
+                               <div class="col-sm-6"> 
+                            <label class="col-sm-4" for="from_date">Start Date</label>
+                            <div class="col-sm-8">
+                            <input type="date" class="form-control datepicker hasDatepicker" @bind="fromDate">
+                       
+                             </div>
+                         </div>
+                        <div class="col-sm-6">
+                            <label class="col-sm-4" for="to_date">End Date</label>
+                            <div class="col-sm-8">
+                            <input type="date" class="form-control datepicker hasDatepicker" @bind="toDate">
+                       
+                        </div>  
+                        </div>
+                            </div>
+                            <div class="col-sm-5">
+        <button type="button" @onclick="@(async ()=> {await GenerateExcel();})" class="btn btn-info"><i class="i-File-Excel"></i> EXCEL
+        </button>
+                                  <button type="button" class="btn btn-success" @onclick="Search">Search</button>
+                        <a class="btn btn-primary" href="/purchase/purchasereturnadd">Add PurchaseReturn</a>
+                            </div>
+                </div>
+		           
+		        </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="panel panel-bd lobidrag">
+                            <div class="panel-body">
+		            	<div class="table-responsive">
+                            <MudTable Items="@listModel" Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Filter="new Func<PurchaseReturnView,bool>(Search)">
+    <ToolBarContent>
+        <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>VoucherNo</MudTh>
+        <MudTh>Date</MudTh>
+        <MudTh>SupplierName</MudTh>
+        <MudTh>VoucherType</MudTh>
+        <MudTh>Amount</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="LedgerName">@context.VoucherNo</MudTd>
+        <MudTd DataLabel="LedgerCode">@context.Date</MudTd>
+        <MudTd DataLabel="AccountGroupName">@context.LedgerName</MudTd>
+        <MudTd DataLabel="Address">@context.VoucherTypeName</MudTd>
+        <MudTd DataLabel="Email">@context.GrandTotal</MudTd>
+        <MudTd DataLabel="">
+            <a href="/purchase/purchasereturndetails/@context.PurchaseReturnMasterId" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="left" title="" data-original-title="Purchase Details"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+                                    <a @onclick="() => Delete(context.PurchaseReturnMasterId)" class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="left" title="Update"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+                                                                                
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[] {10, 20, 50, 100}" />
+    </PagerContent>
+</MudTable>
+                        </div>
+		    </div>
+		    </div>
+                </div>
+                </div>
+                </div>
+@code {
+    private bool dense = true;
+    private bool hover = true;
+    private bool striped = true;
+    private bool bordered = true;
+    private string searchString1 = "";
+    private string searchString2 = "";
+    DateTime fromDate = DateTime.Now;
+    DateTime toDate = DateTime.Now;
+    List<PurchaseReturnView> listModel = new List<PurchaseReturnView>();
+    protected override void OnInitialized()
+    {
+        LoadData();
+    }
+    private async void LoadData()
+    {
+        listModel = purchaseInvoice.ViewAllPurchaseMasterDetails(1);
+        
+    }
+    async Task Delete(long id)
+    {
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirmed)
+        {
+            PurchaseReturnMaster view = new PurchaseReturnMaster();
+            view = purchaseInvoice.EditPurchaseMaster(id);
+            //view = purchaseInvoice.EditPurchaseMaster(id , view.VoucherNo, 1 , 1);
+            bool isSave = false;
+            isSave = purchaseInvoice.DeletePurchseReturnInvoice(id, view.VoucherNo, 1, 1);
+            if (isSave == true)
+            {
+                Snackbar.Add("Delete Successfully.", Severity.Success);
+                LoadData();
+            }
+            else
+            {
+                Snackbar.Add("Cannot be delete. already in used.", Severity.Info);
+            }
+        }
+    }
+    private bool Search(PurchaseReturnView element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString1))
+            return true;
+        if (element.LedgerName.Contains(searchString1, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.VoucherNo.Contains(searchString1, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+    private async void Search()
+    {
+        listModel = purchaseInvoice.ViewAllPurchseInvoice(1, fromDate , toDate);
+    }
+        protected async Task GenerateExcel()
+    {
+        IWorkbook workbook = new XSSFWorkbook();
+        var dataFormat = workbook.CreateDataFormat();
+        var dataStyle = workbook.CreateCellStyle();
+        dataStyle.DataFormat = dataFormat.GetFormat("MM/yy/dddd HH:mm:ss");
+        ISheet worksheet = workbook.CreateSheet("Sheet1");
+
+
+
+        int rowNumber1 = 0;
+        IRow row1 = worksheet.CreateRow(rowNumber1++);
+        //TbleHeder
+        ICell cell1 = row1.CreateCell(3);
+        cell1.SetCellValue("PurchaseInvoice");
+
+        int rowNumber = 1;
+        IRow row = worksheet.CreateRow(rowNumber++);
+        //TbleHeder
+        ICell cell = row.CreateCell(0);
+        cell.SetCellValue("Voucher No");
+
+        cell = row.CreateCell(1);
+        cell.SetCellValue("Date");
+
+        cell = row.CreateCell(2);
+        cell.SetCellValue("Supplier Name");
+
+        cell = row.CreateCell(3);
+        cell.SetCellValue("Voucher Type");
+
+        cell = row.CreateCell(4);
+        cell.SetCellValue("Amount");
+
+
+        //Tble Body
+        foreach (var objDue in listModel)
+    {
+            row = worksheet.CreateRow(rowNumber++);
+
+            cell = row.CreateCell(0);
+            cell.SetCellValue(objDue.VoucherNo);
+
+            cell = row.CreateCell(1);
+            cell.SetCellValue(objDue.Date.ToString());
+
+            cell = row.CreateCell(2);
+            cell.SetCellValue(objDue.LedgerName);
+
+            cell = row.CreateCell(3);
+            cell.SetCellValue(objDue.VoucherTypeName);
+
+            cell = row.CreateCell(4);
+            cell.SetCellValue(objDue.GrandTotal.ToString());
+
+        }
+        MemoryStream ms = new MemoryStream();
+        workbook.Write(ms);
+        byte[] bytes = ms.ToArray();
+        ms.Close();
+
+        await JsRuntime.SaveAsFileAsync("PurchaseReturn", bytes, "application/vnd.ms-excel");
+    }
+}

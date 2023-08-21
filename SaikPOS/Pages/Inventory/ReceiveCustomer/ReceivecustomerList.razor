@@ -1,0 +1,193 @@
+﻿@page "/sales/receivecustomerlist"
+@inject ISalesInvoice salesInvoiceRepository
+@inject IAccountLedger accountLedger
+@inject IReceiveCustomer _payment
+@inject IPaymentSupplier _paymentSupplier
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+<div class="content">
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Sales</a></li>
+                <li><a href="/">Customer</a></li>
+                <li class="active">Payment Receive</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                    
+             <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-body"> 
+                                               <div class="col-sm-4">
+                        <div class="form-group row">
+                            <label for="supplier_name" class="col-sm-4 col-form-label">Customer <i class="text-danger">*</i></label>
+                            <div class="col-sm-8">
+                                  <select class="form-control" @bind="LedgerId">
+                                      <option value="0">Choose Customer</option>
+                                      @foreach(var item in listSupplier)
+                                        {
+                                            <option value="@item.LedgerId">@item.LedgerName</option>
+                                        }
+                                    </select>  
+                            </div>
+                            </div>
+                            </div> 
+                            <div class="col-sm-5">
+                        <div class="form-group row">
+                                <label for="from_date " class="col-sm-2 col-form-label"> From</label>
+                                <div class="col-sm-4">
+                                    <input type="date" @bind-value="FromDate" class="datepicker form-control hasDatepicker">
+                                </div>
+                                 <label for="to_date" class="col-sm-2 col-form-label"> To</label>
+                                <div class="col-sm-4">
+                                    <input type="date" @bind-value="ToDate" class="datepicker form-control hasDatepicker">
+                                </div>
+                          
+                        </div>
+                    </div>
+
+                       <div class="col-sm-3">
+                           
+                                <button type="button" class="btn btn-success" @onclick="LoadData"><i class="fa fa-search-plus" aria-hidden="true"></i> Search</button>
+                                <button type="button" class="btn btn-warning" onclick="printDiv('printableArea')">Print</button>
+                        
+                        
+                    </div>
+                  </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- supplier ledger -->
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <span>Payment Receive</span>
+                            <span class="padding-lefttitle">
+                                <a href="/sales/receivecustomeradd" class="btn btn-info m-b-5 m-r-2"><i class="ti-plus"> </i> Add Receive </a>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="printableArea">
+
+                            
+                            <div class="table-responsive">
+
+                                <table class="table table-bordered table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">S.No</th>
+                                            <th class="text-center">Receive No</th>
+                                            <th class="text-center">Date No</th>
+                                            <th class="text-right">Customer Name</th>
+                                            <th class="text-right">Voucher Type</th>
+                                            <th class="text-right">Receive Amount</th>
+                                             <th class="text-right">Type</th>
+                                              <th class="text-right">User</th>
+                                              <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                int sno = 0;
+                            }
+                            @foreach (var item in articleModel)
+                            {          
+                                        <tr>
+                                                    <td>
+                                                        @{sno++;}
+                                                        @sno
+                                                        </td>
+                                                    <td>
+                                                   @item.VoucherNo
+                                                   </td>
+                                                    <td align="right">
+                                                        @item.Date                                                 </td>
+                                                    <td>
+                                                        @item.LedgerName                                                 </td>
+                                                    <td align="right">
+                                                        @item.VoucherTypeName
+                                                        </td>
+                                                        <td align="right">
+                                                        @item.TotalAmount
+                                                        </td>
+                                                        <td align="right">
+                                                        <span class="badge badge-outline-success">@item.Optional</span>
+                                                        </td>
+                                                        <td align="right">
+                                                        @item.UserId
+                                                        </td>
+                                                        <td>
+                                                            <a href="/sales/receivecustomershow/@item.ReceiptMasterId" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="left" title="" data-original-title="Receive Voucher"><i class="fa fa-eye"></i></a>
+                                                            <a @onclick="() => Delete(item.ReceiptMasterId)" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="left" title="Delete"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+                                                        </td>
+                                                </tr>
+                                                }
+                                                                                    
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="5" align="right"><b>Grand Total:</b></td>
+                                            <td align="right"><b>@articleModel.Sum(i => i.TotalAmount)</b>
+                                            </td>
+                                            <td>
+
+                                            </td>
+                                       <td>
+
+                                       </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>                </div>
+
+@code {
+    List<PaymentReceiveView> articleModel;
+    List<AccountLedgerView> listSupplier = new List<AccountLedgerView>();
+    ReceiptMaster view;
+    string voucherNo = string.Empty;
+    DateTime FromDate = DateTime.Now;
+    DateTime ToDate = DateTime.Now;
+    long LedgerId = 0;
+    string Email;
+    protected async override void OnInitialized()
+    {
+        LoadData();
+    }
+    protected void LoadData()
+    {
+        articleModel = _payment.ViewAllReceiveCustomer(LedgerId, 1, 1, voucherNo);
+        listSupplier = accountLedger.ViewAllCustomer(1);
+    }
+    async Task Delete(long id)
+    {
+            bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+            if (confirmed)
+            {
+                view = _payment.EditReceiveCustomer(id);
+                bool isSave = false;
+                isSave = _payment.ReceiveCustomerDelete(view.VoucherNo, view.VoucherTypeId, view.FinancialYearId, view.CompanyId);
+                if (isSave == true)
+                {
+                    Snackbar.Add("Deleted Successfully.", Severity.Success);
+                    LoadData();
+                }
+                else
+                {
+                    Snackbar.Add("Cannot be delete. already in used.", Severity.Success);
+                }
+            }
+    }
+}

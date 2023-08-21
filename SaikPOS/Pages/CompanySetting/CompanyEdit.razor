@@ -1,0 +1,204 @@
+﻿@page "/setting/companyedit/{id}"
+@inject ICompany company
+@inject ICountry country
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@using BlazorInputFile
+@inject ISnackbar Snackbar
+@*<PageTitle>Product / CompanyEdit</PageTitle>*@
+<div class="content">
+
+
+
+       
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Product</a></li>
+                <li class="active">Edit Company</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                     <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <h4>Add Company </h4>
+                        </div>
+                    </div>
+                   
+                    <div class="panel-body">
+                            	<EditForm Model="@master" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Photo <i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        
+                                   <BlazorInputFile.InputFile OnChange="HandleSelection" />
+                                    <img src="@convertImageToDisplay(master.LogoPath)" width="40" height="40" />
+                                </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Name <i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.CompanyName" placeholder="Name">
+                                    <ValidationMessage For="@(() => master.CompanyName)" />
+                                    
+                                </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Mobile <i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.Mobile" placeholder="Mobile">
+                                    <ValidationMessage For="@(() => master.Mobile)" />
+                                    
+                                </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Email <i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.EmailId" placeholder="EmailId">
+                                    <ValidationMessage For="@(() => master.EmailId)" />
+                                    
+                                </div>
+                                </div>
+                                @*<div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Country <i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <select class="form-control" @bind="master.CountryId">
+                                        <option value="0">Choose</option>
+                                        @foreach(var item in listCountry)
+                                        {
+                                            <option value="@item.CountryId">@item.CountryName</option>
+                                        }
+                                    </select>
+                                    
+                                </div>
+                                </div>*@
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">State:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.State" placeholder="State">
+                                    <ValidationMessage For="@(() => master.State)" />
+                                    
+                                </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">City:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.City" placeholder="City">
+                                    <ValidationMessage For="@(() => master.City)" />
+                                    
+                                </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Address:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.Address" placeholder="Address">
+                                    <ValidationMessage For="@(() => master.Address)" />
+                                    
+                                </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Pan No:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.Pan" placeholder="Pan No">
+                                    <ValidationMessage For="@(() => master.Pan)" />
+                                    
+                                </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Estd:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.Estd" placeholder="Estd">
+                                    <ValidationMessage For="@(() => master.Estd)" />
+                                    
+                                </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Website:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.Web" placeholder="Website">
+                                    <ValidationMessage For="@(() => master.Web)" />
+                                    
+                                </div>
+                                </div>
+                         <div class="form-group row">
+                                   
+                                     <div class="col-sm-6 text-right">
+                                     <button type="submit" class="btn btn-success ">Save</button>
+                                      <button type="button" class="btn btn-danger" @onclick="@Cancel">Back to List</button>
+                                                    
+                                       
+                                       
+                                    </div>
+                                </div>
+                                </EditForm>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+               
+                </div>
+@code {
+    [Parameter]
+    public string id { get; set; }
+    Company master = new Company();
+    List<Country> listCountry;
+    public byte[] ImageUploaded { get; set; }
+    protected async override void OnInitialized()
+    {
+        master = company.Edit(Convert.ToInt64(id));
+        listCountry = country.GetAll();
+        master.CountryId = 1;
+        StateHasChanged();
+    }
+    public async Task HandleValidSubmit()
+    {
+        if (ImageUploaded != null)
+                    {
+                        master.LogoPath = ImageUploaded;
+                        ImageUploaded = null;
+                    }
+            company.Update(master);
+            Snackbar.Add("Updated Successfully.", Severity.Success);
+            navManager.NavigateTo("/setting/companylist");
+    }
+    async Task HandleSelection(IFileListEntry[] files)
+    {
+        var file = files.FirstOrDefault();
+        if (file != null)
+        {
+            var ms = new MemoryStream();
+            await file.Data.CopyToAsync(ms);
+            ImageUploaded = ms.ToArray();
+        }
+    }
+
+    string convertImageToDisplay(byte[] image)
+    {
+        if (image != null)
+        {
+            var base64 = Convert.ToBase64String(image);
+            var finalStr = string.Format("data:image/jpg;base64,{0}", base64);
+            return finalStr;
+        }
+        return "";
+    }
+    void Cancel()
+    {
+        navManager.NavigateTo("/setting/companylist");
+    }
+    }

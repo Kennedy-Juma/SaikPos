@@ -1,0 +1,70 @@
+D:\CodecanonProject\Inventory\dotnet5\Part\8\Dreamer\Common\bin\Debug\net5.0\Common.deps.json
+D:\CodecanonProject\Inventory\dotnet5\Part\8\Dreamer\Common\bin\Debug\net5.0\Common.dll
+D:\CodecanonProject\Inventory\dotnet5\Part\8\Dreamer\Common\bin\Debug\net5.0\ref\Common.dll
+D:\CodecanonProject\Inventory\dotnet5\Part\8\Dreamer\Common\bin\Debug\net5.0\Common.pdb
+D:\CodecanonProject\Inventory\dotnet5\Part\8\Dreamer\Common\obj\Debug\net5.0\Common.GeneratedMSBuildEditorConfig.editorconfig
+D:\CodecanonProject\Inventory\dotnet5\Part\8\Dreamer\Common\obj\Debug\net5.0\Common.AssemblyInfoInputs.cache
+D:\CodecanonProject\Inventory\dotnet5\Part\8\Dreamer\Common\obj\Debug\net5.0\Common.AssemblyInfo.cs
+D:\CodecanonProject\Inventory\dotnet5\Part\8\Dreamer\Common\obj\Debug\net5.0\Common.csproj.CoreCompileInputs.cache
+D:\CodecanonProject\Inventory\dotnet5\Part\8\Dreamer\Common\obj\Debug\net5.0\Common.dll
+D:\CodecanonProject\Inventory\dotnet5\Part\8\Dreamer\Common\obj\Debug\net5.0\ref\Common.dll
+D:\CodecanonProject\Inventory\dotnet5\Part\8\Dreamer\Common\obj\Debug\net5.0\Common.pdb
+D:\CodecanonProject\Inventory\dotnet5\Dreamer\Common\bin\Debug\net5.0\Common.deps.json
+D:\CodecanonProject\Inventory\dotnet5\Dreamer\Common\bin\Debug\net5.0\Common.dll
+D:\CodecanonProject\Inventory\dotnet5\Dreamer\Common\bin\Debug\net5.0\Common.pdb
+D:\CodecanonProject\Inventory\dotnet5\Dreamer\Common\obj\Debug\net5.0\Common.GeneratedMSBuildEditorConfig.editorconfig
+D:\CodecanonProject\Inventory\dotnet5\Dreamer\Common\obj\Debug\net5.0\Common.AssemblyInfoInputs.cache
+D:\CodecanonProject\Inventory\dotnet5\Dreamer\Common\obj\Debug\net5.0\Common.AssemblyInfo.cs
+D:\CodecanonProject\Inventory\dotnet5\Dreamer\Common\obj\Debug\net5.0\Common.csproj.CoreCompileInputs.cache
+D:\CodecanonProject\Inventory\dotnet5\Dreamer\Common\obj\Debug\net5.0\Common.dll
+D:\CodecanonProject\Inventory\dotnet5\Dreamer\Common\obj\Debug\net5.0\ref\Common.dll
+D:\CodecanonProject\Inventory\dotnet5\Dreamer\Common\obj\Debug\net5.0\Common.pdb
+D:\CodecanonProject\Inventory\dotnet5\Dreamer\Common\obj\Debug\net5.0\Common.csproj.AssemblyReference.cache
+D:\CodecanonProject\Inventory\dotnet5\Dreamer\Common\obj\Debug\net5.0\refint\Common.dll
+D:\CodecanonProject\Dotnet5\BusinessPro\Dreamer\Common\bin\Debug\net5.0\Common.deps.json
+D:\CodecanonProject\Dotnet5\BusinessPro\Dreamer\Common\bin\Debug\net5.0\Common.dll
+D:\CodecanonProject\Dotnet5\BusinessPro\Dreamer\Common\bin\Debug\net5.0\Common.pdb
+D:\CodecanonProject\Dotnet5\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.csproj.AssemblyReference.cache
+D:\CodecanonProject\Dotnet5\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.GeneratedMSBuildEditorConfig.editorconfig
+D:\CodecanonProject\Dotnet5\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.AssemblyInfoInputs.cache
+D:\CodecanonProject\Dotnet5\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.AssemblyInfo.cs
+D:\CodecanonProject\Dotnet5\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.csproj.CoreCompileInputs.cache
+D:\CodecanonProject\Dotnet5\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.dll
+D:\CodecanonProject\Dotnet5\BusinessPro\Dreamer\Common\obj\Debug\net5.0\refint\Common.dll
+D:\CodecanonProject\Dotnet5\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.pdb
+D:\CodecanonProject\Dotnet5\BusinessPro\Dreamer\Common\obj\Debug\net5.0\ref\Common.dll
+D:\CodecanonProject\Dotnet5\codecanyon-XMLEjfW6-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\bin\Debug\net5.0\Common.deps.json
+D:\CodecanonProject\Dotnet5\codecanyon-XMLEjfW6-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\bin\Debug\net5.0\Common.dll
+D:\CodecanonProject\Dotnet5\codecanyon-XMLEjfW6-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\bin\Debug\net5.0\Common.pdb
+D:\CodecanonProject\Dotnet5\codecanyon-XMLEjfW6-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.csproj.AssemblyReference.cache
+D:\CodecanonProject\Dotnet5\codecanyon-XMLEjfW6-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.GeneratedMSBuildEditorConfig.editorconfig
+D:\CodecanonProject\Dotnet5\codecanyon-XMLEjfW6-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.AssemblyInfoInputs.cache
+D:\CodecanonProject\Dotnet5\codecanyon-XMLEjfW6-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.AssemblyInfo.cs
+D:\CodecanonProject\Dotnet5\codecanyon-XMLEjfW6-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.csproj.CoreCompileInputs.cache
+D:\CodecanonProject\Dotnet5\codecanyon-XMLEjfW6-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.dll
+D:\CodecanonProject\Dotnet5\codecanyon-XMLEjfW6-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\refint\Common.dll
+D:\CodecanonProject\Dotnet5\codecanyon-XMLEjfW6-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.pdb
+D:\CodecanonProject\Dotnet5\codecanyon-XMLEjfW6-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\ref\Common.dll
+C:\Users\kennedy.juma\Downloads\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\bin\Debug\net5.0\Common.deps.json
+C:\Users\kennedy.juma\Downloads\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\bin\Debug\net5.0\Common.dll
+C:\Users\kennedy.juma\Downloads\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\bin\Debug\net5.0\ref\Common.dll
+C:\Users\kennedy.juma\Downloads\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\bin\Debug\net5.0\Common.pdb
+C:\Users\kennedy.juma\Downloads\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\kennedy.juma\Downloads\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.AssemblyInfoInputs.cache
+C:\Users\kennedy.juma\Downloads\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.AssemblyInfo.cs
+C:\Users\kennedy.juma\Downloads\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.csproj.CoreCompileInputs.cache
+C:\Users\kennedy.juma\Downloads\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.dll
+C:\Users\kennedy.juma\Downloads\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\ref\Common.dll
+C:\Users\kennedy.juma\Downloads\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\BusinessPro\Dreamer\Common\obj\Debug\net5.0\Common.pdb
+E:\Personal Projects\SaikPOS\Common\bin\Debug\net5.0\Common.deps.json
+E:\Personal Projects\SaikPOS\Common\bin\Debug\net5.0\Common.dll
+E:\Personal Projects\SaikPOS\Common\bin\Debug\net5.0\Common.pdb
+E:\Personal Projects\SaikPOS\Common\obj\Debug\net5.0\Common.csproj.AssemblyReference.cache
+E:\Personal Projects\SaikPOS\Common\obj\Debug\net5.0\Common.GeneratedMSBuildEditorConfig.editorconfig
+E:\Personal Projects\SaikPOS\Common\obj\Debug\net5.0\Common.AssemblyInfoInputs.cache
+E:\Personal Projects\SaikPOS\Common\obj\Debug\net5.0\Common.AssemblyInfo.cs
+E:\Personal Projects\SaikPOS\Common\obj\Debug\net5.0\Common.csproj.CoreCompileInputs.cache
+E:\Personal Projects\SaikPOS\Common\obj\Debug\net5.0\Common.dll
+E:\Personal Projects\SaikPOS\Common\obj\Debug\net5.0\ref\Common.dll
+E:\Personal Projects\SaikPOS\Common\obj\Debug\net5.0\Common.pdb
+E:\Personal Projects\SaikPOS\Common\obj\Debug\net5.0\refint\Common.dll

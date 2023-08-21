@@ -1,0 +1,111 @@
+﻿@page "/company/useredit/{id}"
+@using Microsoft.AspNetCore.Identity
+@inject IUser _user
+@inject IRole role
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+@*<PageTitle>Product / AreaEdit</PageTitle>*@
+<div class="content">
+
+
+
+       
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Company</a></li>
+                <li class="active">Edit User</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                     <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <h4>Edit User </h4>
+                        </div>
+                    </div>
+                   
+                    <div class="panel-body">
+                            	<EditForm Model="@master" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Name <i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.Name">
+                                    <ValidationMessage For="@(() => master.Name)" />
+                                    
+                                </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Email <i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.Email" readonly>
+                                    <ValidationMessage For="@(() => master.Email)" />
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Role <i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <select class="form-control" @bind="master.RoleId">
+                                        @foreach(var item in listModel)
+                                        {
+                                            <option value="@item.Id">@item.Name</option>
+                                        }
+                                    </select>
+                                    
+                                </div>
+                                </div>
+                         <div class="form-group row">
+                                   
+                                     <div class="col-sm-6 text-right">
+                                     @*<button type="submit" class="btn btn-success ">Save</button>*@
+                                      <button type="button" class="btn btn-danger" @onclick="@Cancel">Back to List</button>
+                                                    
+                                       
+                                       
+                                    </div>
+                                </div>
+                                </EditForm>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+               
+                </div>
+@code {
+    [Parameter]
+    public string id { get; set; }
+    ApplicationUser master = new ApplicationUser();
+    List<IdentityRole> listModel;
+    protected async override void OnInitialized()
+    {
+        listModel = role.ViewRole();
+       master = _user.Edit(id);
+    }
+    public async Task HandleValidSubmit()
+    {
+        Snackbar.Add("This is a demo.", Severity.Success);
+//        bool isSave = false;
+//        isSave = _user.Update(master);
+//        if (isSave == true)
+//        {
+//            Snackbar.Add("Updated Successfully.", Severity.Success);
+//            navManager.NavigateTo("/company/userlist");
+//}
+//        else
+//         {
+//             Snackbar.Add("Already Exists.", Severity.Info);
+//          }
+    }
+    void Cancel()
+    {
+        navManager.NavigateTo("/company/userlist");
+    }
+    }

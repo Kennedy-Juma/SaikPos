@@ -1,0 +1,223 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\kennedy.juma\\Downloads\\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\\BusinessPro\\Dreamer\\Dreamer\\Dreamer.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\kennedy.juma\\Downloads\\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\\BusinessPro\\Dreamer\\Common\\Common.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\kennedy.juma\\Downloads\\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\\BusinessPro\\Dreamer\\Common\\Common.csproj",
+        "projectName": "Common",
+        "projectPath": "C:\\Users\\kennedy.juma\\Downloads\\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\\BusinessPro\\Dreamer\\Common\\Common.csproj",
+        "packagesPath": "C:\\Users\\kennedy.juma\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\kennedy.juma\\Downloads\\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\\BusinessPro\\Dreamer\\Common\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\kennedy.juma\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[5.0.0, 5.0.0]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[5.0.0, 5.0.0]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[5.0.0, 5.0.0]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.415\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\kennedy.juma\\Downloads\\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\\BusinessPro\\Dreamer\\Dreamer\\Dreamer.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\kennedy.juma\\Downloads\\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\\BusinessPro\\Dreamer\\Dreamer\\Dreamer.csproj",
+        "projectName": "Dreamer",
+        "projectPath": "C:\\Users\\kennedy.juma\\Downloads\\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\\BusinessPro\\Dreamer\\Dreamer\\Dreamer.csproj",
+        "packagesPath": "C:\\Users\\kennedy.juma\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\kennedy.juma\\Downloads\\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\\BusinessPro\\Dreamer\\Dreamer\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\kennedy.juma\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {
+              "C:\\Users\\kennedy.juma\\Downloads\\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\\BusinessPro\\Dreamer\\Common\\Common.csproj": {
+                "projectPath": "C:\\Users\\kennedy.juma\\Downloads\\codecanyon-34983661-business-pro-accounting-inventory-product-shop-company-management\\BusinessPro\\Dreamer\\Common\\Common.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "BlazorInputFile": {
+              "target": "Package",
+              "version": "[0.2.0, )"
+            },
+            "Blazored.LocalStorage": {
+              "target": "Package",
+              "version": "[4.1.5, )"
+            },
+            "Blazored.Typeahead": {
+              "target": "Package",
+              "version": "[4.6.0, )"
+            },
+            "Dapper": {
+              "target": "Package",
+              "version": "[2.0.123, )"
+            },
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[5.0.12, )"
+            },
+            "Microsoft.AspNetCore.Identity.UI": {
+              "target": "Package",
+              "version": "[5.0.12, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[5.0.12, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[5.0.12, )"
+            },
+            "Microsoft.Extensions.Localization": {
+              "target": "Package",
+              "version": "[5.0.12, )"
+            },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+              "target": "Package",
+              "version": "[5.0.2, )"
+            },
+            "MudBlazor": {
+              "target": "Package",
+              "version": "[5.0.11, )"
+            },
+            "NETStandardBarcode": {
+              "target": "Package",
+              "version": "[1.0.2, )"
+            },
+            "NPOI": {
+              "target": "Package",
+              "version": "[2.5.5, )"
+            },
+            "QRCoderNetCore": {
+              "target": "Package",
+              "version": "[1.0.0, )"
+            },
+            "Radzen.Blazor": {
+              "target": "Package",
+              "version": "[3.14.6, )"
+            },
+            "iTextSharp.LGPLv2.Core": {
+              "target": "Package",
+              "version": "[1.7.5, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[5.0.0, 5.0.0]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[5.0.17, 5.0.17]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[5.0.0, 5.0.0]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[5.0.0, 5.0.0]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.415\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

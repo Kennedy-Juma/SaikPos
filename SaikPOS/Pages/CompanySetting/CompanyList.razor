@@ -1,0 +1,89 @@
+﻿@page "/setting/companylist"
+@inject ICompany company
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+
+@*<PageTitle>Setting / CompanyList</PageTitle>*@
+<div class="content">
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Product</a></li>
+                <li class="active">Manage Company</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                    <div class="row">
+	<div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <span>Manage Company</span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table id="dataTableExample3" class="table table-bordered table-striped table-hover">
+                                <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th class="text-center">Name</th>
+                            <th class="text-center">Address</th>
+                            <th class="text-center">Mobile</th>
+                            <th class="text-center">Website</th>
+                            <th class="text-center">Photo</th>
+                        </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                    int sno = 0;
+                                }
+                                          @foreach(var item in listModel)
+                                          {
+                                        <tr>
+                                   <td>@{sno++;}
+                                            @sno</td>
+                                    <td class="text-center">@item.CompanyName</td>
+                                  <td class="text-center">@item.Address</td>
+                                  <td class="text-center">@item.Mobile</td>
+                                  <td class="text-center">@item.Web</td>
+                                  <td class="text-center"><img src="@convertImageToDisplay(item.LogoPath)" width="40" height="40"></td>
+                                    <td>
+                                    <center>
+                                     <a href="/setting/companyedit/@item.CompanyId" class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="left" title="" data-original-title="Update">
+                                         <i class="fa fa-pencil" aria-hidden="true"></i></a>
+                                    </center>
+                                    </td>
+                                    </tr>
+                                    }
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+</div>                </div>
+
+@code {
+    List<Company> listModel;
+    protected override void OnInitialized()
+    {
+        LoadData();
+    }
+    private async void LoadData()
+    {
+        listModel = company.GetAll();
+    }
+    string convertImageToDisplay(byte[] image)
+    {
+        if (image != null)
+        {
+            var base64 = Convert.ToBase64String(image);
+            var finalStr = string.Format("data:image/jpg;base64,{0}", base64);
+            return finalStr;
+        }
+        return "";
+    }
+}

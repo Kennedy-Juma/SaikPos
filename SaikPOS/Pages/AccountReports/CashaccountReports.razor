@@ -1,0 +1,268 @@
+﻿@page "/account/cashaccount"
+@inject IAccountLedger ledger
+@inject IInventoryReport report
+@inject ICompany icompany
+@inject IVoucherType voucherType
+@using System.Data;
+@inject IJSRuntime JsRuntime
+@inject ISnackbar Snackbar
+<div class="content">
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Account Report</a></li>
+                <li class="active">Cash Account Reports</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                    
+                     <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-body"> 
+                        
+                            <div class="col-sm-3">
+                           
+                            <label class="col-sm-4" for="product">Cash</label>
+                            <div class="col-sm-8">
+                            <select class="form-control" @bind="LedgerId">
+                              <option value="0">Choose Cash</option>
+                              @foreach(var item in listCash)
+                                {
+                                    <option value="@item.LedgerId">@item.LedgerName</option>
+                                }
+                            </select>
+                       </div>
+                            </div>
+                            <div class="col-sm-7">
+                               <div class="col-sm-6"> 
+                            <label class="col-sm-4" for="from_date">Start Date</label>
+                            <div class="col-sm-8">
+                            <input type="date" class="form-control datepicker hasDatepicker" @bind="FromDate">
+                       
+                             </div>
+                         </div>
+                        <div class="col-sm-6">
+                            <label class="col-sm-4" for="to_date">End Date</label>
+                            <div class="col-sm-8">
+                            <input type="date" class="form-control datepicker hasDatepicker" @bind="ToDate">
+                       
+                        </div>  
+                        </div>
+                            </div>
+                            <div class="col-sm-2">
+                                  <button type="button" class="btn btn-success" @onclick="Search">Search</button>
+                        <a class="btn btn-warning" onclick="printDiv('PrintDiv')">Print</a>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+       
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <span>DayBook Reports</span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="PrintDiv" class="table-responsive ">
+                            <div class="paddin5ps">
+                                      <table class="print-table" width="100%">
+                
+                <tbody><tr>
+                    <td align="left" class="print-table-tr">
+                        <img src="@convertImageToDisplay(company.LogoPath)" class="companyimg" />
+                    </td>
+                    <td align="center" class="print-cominfo">
+                        <span class="company-txt">
+                            @company.CompanyName                  
+                        </span><br>
+                        @company.Address                        <br>
+                         @company.Phone
+                    </td>
+                   
+                     <td align="right" class="print-table-tr">
+                        <date>
+                        @DateTime.Now
+                    </date>
+                    </td>
+                </tr>            
+                                   
+                                </tbody></table>
+                            </div>
+
+                            <div class="table-responsive paddin5ps">
+                                @((MarkupString)myMarkup)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+                   </div>
+@code {
+    List<AccountLedger> listCash = new List<AccountLedger>();
+    List<VoucherType> listVoucherType = new List<VoucherType>();
+    List<PurchaseSales> final = new List<PurchaseSales>();
+    long LedgerId = 0;
+    long VoucherTypeId = 0;
+    DateTime FromDate = DateTime.Now;
+    DateTime ToDate = DateTime.Now;
+    Company company = new Company();
+    string myMarkup;
+    protected async override void OnInitialized()
+    {
+        company = icompany.Edit(1);
+        listCash = ledger.GetCashFill();
+    }
+    protected void Search()
+    {
+                string values = @"<table id='table' class='table table-striped'>
+        <tr>
+            <th style=''>S.No.</th>
+            <th>Date</th>
+            <th>Voucher No</th>
+            <th>Particular</th>
+            <th>Voucher Type</th>
+            <th>Debit</th>
+            <th>Credit</th>
+            <th>Balance</th>
+        </tr> ";
+
+        decimal totlDebit = 0;
+        decimal totlCredit = 0;
+
+        DataTable dtblsub = new DataTable();
+        DataSet dset = new DataSet();
+        dset = report.LedgercountReport(Convert.ToDateTime(FromDate), Convert.ToDateTime(ToDate), LedgerId, string.Empty, 1);
+        int counter = 0;
+        dtblsub = dset.Tables[0];
+        string strBalance = string.Empty;
+        string strName = string.Empty;
+
+        if (dtblsub.Rows.Count > 0)
+        {
+            for (int i = 0; i < dtblsub.Rows.Count; i++)
+            {
+                counter++;
+                strBalance = CalculateBalance(i, decimal.Parse(dtblsub.Rows[i]["debit"].ToString()), decimal.Parse(dtblsub.Rows[i]["credit"].ToString()), strBalance);
+                totlDebit = totlDebit + decimal.Parse(dtblsub.Rows[i]["debit"].ToString());
+                totlCredit = totlCredit + decimal.Parse(dtblsub.Rows[i]["credit"].ToString());
+                string strVoucherTypeName = dtblsub.Rows[i]["VoucherTypeName"].ToString();
+                if (strVoucherTypeName == "Purchase Invoice")
+                {
+                    strName = "To";
+                }
+                else if (strVoucherTypeName == "Purchase Return")
+                {
+                    strName = "To";
+                }
+                else if (strVoucherTypeName == "Payment Voucher")
+                {
+                    strName = "By";
+                }
+                else if (strVoucherTypeName == "Sales Invoice")
+                {
+                    strName = "To";
+                }
+                else if (strVoucherTypeName == "Sales Return")
+                {
+                    strName = "To";
+                }
+                else if (strVoucherTypeName == "Receipt Voucher")
+                {
+                    strName = "By";
+                }
+                else
+                {
+                }
+                values += @"<tr>
+
+    <td style=''>" + counter.ToString() + @"</td>
+    <td>" + dtblsub.Rows[i]["date"].ToString() + @"</td>
+    <td>" + dtblsub.Rows[i]["voucherNo"].ToString() + @" </td>
+    <td> " + strName + "-" + dtblsub.Rows[i]["ledgerName"].ToString() + @"</td>
+    <td> " + dtblsub.Rows[i]["voucherTypeName"].ToString() + @"</td>
+<td> " + dtblsub.Rows[i]["debit"].ToString() + @"</td>
+    <td> " + dtblsub.Rows[i]["credit"].ToString() + @"</td>
+    <td>" + strBalance.ToString() + @"</td>
+</tr>";
+
+            }
+        }
+        decimal decTotlDebitss = totlDebit;
+        decimal decTotlCreditss = totlCredit;
+        decimal decBlnce = decTotlDebitss - decTotlCreditss;
+        values += @"<tr>
+<td style='display:none;'></td>
+<td></td>
+<td></td>
+<td></td>
+<td style='font-style:bold; color:black; font-size:16px;'>Total</td>
+<td>" + "" + @"</td>
+<td style='font-style:bold; color:black; font-size:16px;'>" + decTotlDebitss + @"</td>
+<td style='font-style:bold; color:black; font-size:16px;'>" + decTotlCreditss + @"</td>
+<td>" + decBlnce + @"</td>
+</tr>";
+        values += "</table>";
+        myMarkup = values;
+    }
+    private string CalculateBalance(int index, decimal decDebit, decimal decCredit, string strPreviousBalance)
+    {
+        string strCurrentBalance = string.Empty;
+        string strCrOrDr = string.Empty;
+        decimal decRowBalance = 0;
+        try
+        {
+            if (index > 0)
+            {
+                string[] strLastBalance = strPreviousBalance.Split(' ');
+                if (strLastBalance.Length >= 2)
+                {
+                    if ((strLastBalance[1] == null ? "" : strLastBalance[1]) != string.Empty)
+                    {
+                        if (strLastBalance[1] == "Dr")
+                        {
+                            decDebit = decimal.Parse(strLastBalance[0]) + decDebit;
+                        }
+                        if (strLastBalance[1] == "Cr")
+                        {
+                            decCredit = decimal.Parse(strLastBalance[0]) + decCredit;
+                        }
+                    }
+                }
+            }
+            decRowBalance = decDebit - decCredit;
+            if (decRowBalance > 0)
+                strCrOrDr = " Dr";
+            else if (decRowBalance < 0)
+            {
+                decRowBalance = decRowBalance * (-1);
+                strCrOrDr = " Cr";
+            }
+            else
+                strCrOrDr = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        return strCurrentBalance = Convert.ToString(decRowBalance) + strCrOrDr;
+    }
+    string convertImageToDisplay(byte[] image)
+    {
+        if (image != null)
+        {
+            var base64 = Convert.ToBase64String(image);
+            var finalStr = string.Format("data:image/jpg;base64,{0}", base64);
+            return finalStr;
+        }
+        return "";
+    }
+    }

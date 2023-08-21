@@ -1,0 +1,242 @@
+﻿@page "/account/accountgrouplist"
+@inject IAccountGroup accountGroup
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+
+<div class="content">
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Account</a></li>
+                <li class="active">Manage AccountGroup</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                    <div class="row">
+	<div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <span>Manage AccountGroup</span>
+                           <span class="padding-lefttitle">
+                            @*<a href="/product/areaadd" class="btn btn-primary m-b-5 m-r-2"><i class="ti-plus"> </i>  Add AccountGroup </a>*@
+                                               </span>
+
+                        </div>
+                    </div>
+                    <div class="panel-body">
+
+
+
+                     <div class="form-group row">
+                        <label for="vo_no" class="col-sm-2 col-form-label">Account Group</label>
+                        <div class="col-sm-4">
+                             <input type="text" @bind="master.AccountGroupName" class="form-control" readonly="">
+                        </div>
+                    </div> 
+                     <div class="form-group row">
+                        <label for="date" class="col-sm-2 col-form-label">Group Code<i class="text-danger">*</i></label>
+                        <div class="col-sm-4">
+                             <input type="text" @bind="master.GroupCode" class="form-control">
+                        </div>
+                    </div> 
+                   
+                    <div class="form-group row">
+                        <label for="account_head" class="col-sm-2 col-form-label">Under <i class="text-danger">*</i></label>
+                    <div class="col-sm-4">
+                        <select class="form-control" @bind="master.GroupUnder">
+                            @foreach(var item in listUnder)
+                                {
+                                    <option value="@item.AccountGroupId">@item.AccountGroupName</option>
+                                }
+                        </select>
+                    </div>
+                               
+                    </div>
+                      <div class="form-group row">
+                        <label for="amount" class="col-sm-2 col-form-label">Group<i class="text-danger">*</i></label>
+                        <div class="col-sm-4">
+                             <select class="form-control" @bind="master.Nature">
+                                 <option value="Assets">Assets</option>
+                                 <option value="Liabilities">Liabilities</option>
+                                 <option value="Income">Income</option>
+                                 <option value="Expenditure">Expenditure</option>
+                        </select>
+                        </div>
+                    </div>
+
+                       
+                          
+                        
+                       <div class="form-group row">
+                        <label for="txtRemarks" class="col-sm-2 col-form-label">Remark</label>
+                        <div class="col-sm-4">
+                          <textarea @bind="master.Narration" class="form-control"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="date" class="col-sm-2 col-form-label">Active<i class="text-danger">*</i></label>
+                        <div class="col-sm-4">
+                             <input type="checkbox" @bind="master.IsDefault" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-sm-4">
+                             <button type="button" class="btn btn-success" @onclick="(async () => Save())">Save</button>
+                        </div>
+                    </div> 
+                        <div class="table-responsive">
+                            <table id="dataTableExample3" class="table table-bordered table-striped table-hover">
+                                <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th class="text-center">Account Group</th>
+                            <th class="text-center">Under</th>
+                        </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                    int sno = 0;
+                                }
+                                          @foreach(var item in listModel)
+                                          {
+                                        <tr>
+                                   <td>@{sno++;}
+                                            @sno</td>
+                                    <td class="text-center">@item.AccountGroupName</td>
+                                  <td class="text-center">@item.Under</td>
+                                    <td>
+                                    <center>
+                                     <a @onclick="() => Edit(item.AccountGroupId)" class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="left" title="" data-original-title="Update">
+                                         <i class="fa fa-pencil" aria-hidden="true"></i></a>
+                                          <a @onclick="() => Delete(item.AccountGroupId)" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="right" title="" data-original-title="Delete "><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+                                                                                
+                                    </center>
+                                    </td>
+                                    </tr>
+                                    }
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+</div>                </div>
+
+@code {
+    AccountGroup master = new AccountGroup();
+    List<AccountGroupView> listModel;
+    List<AccountGroup> listUnder = new List<AccountGroup>();
+    protected override void OnInitialized()
+    {
+        LoadData();
+    }
+    protected void Save()
+    {
+        if (master.AccountGroupName == string.Empty)
+        {
+            Snackbar.Add("Type Account group.", Severity.Info);
+            return;
+        }
+        else if (master.GroupCode == string.Empty)
+        {
+            Snackbar.Add("Type Group code.", Severity.Info);
+            return;
+        }
+        else if (master.Nature == string.Empty)
+        {
+            Snackbar.Add("Choose Nature.", Severity.Info);
+            return;
+        }
+        else
+        {
+            if (master.AccountGroupId == 0)
+            {
+                master.CompanyId = 1;
+                master.CreatedBy = 0;
+                master.AddedDate = DateTime.Now;
+                master.AffectGrossProfit = "No";
+                bool isSave = false;
+                isSave = accountGroup.Save(master);
+                if (isSave == true)
+                {
+                    Snackbar.Add("Saved Successfully.", Severity.Success);
+                    LoadData();
+                }
+                else
+                {
+                    Snackbar.Add("Already exists.", Severity.Success);
+                }
+            }
+            else
+            {
+                master.CompanyId = 1;
+                master.ModifyBy = 0;
+                master.ModifyDate = DateTime.Now;
+                master.AffectGrossProfit = "No";
+                bool isSave = false;
+                isSave = accountGroup.Update(master);
+                if (isSave == true)
+                {
+                    Snackbar.Add("Updated Successfully.", Severity.Success);
+                    LoadData();
+                }
+                else
+                {
+                    Snackbar.Add("Already exists.", Severity.Success);
+                }
+            }
+        }
+    }
+    private async void LoadData()
+    {
+        master.AccountGroupId = 0;
+        master.AccountGroupName = string.Empty;
+        master.Narration = string.Empty;
+        master.GroupCode = string.Empty;
+        listModel = accountGroup.ViewAllAccountGroup();
+        listUnder = accountGroup.GetAll();
+    }
+    async Task Delete(long id)
+    {
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirmed)
+        {
+            master = accountGroup.Edit(id);
+            if (master.IsDefault == false)
+            {
+                bool isSave = false;
+                isSave = accountGroup.Delete(id);
+                if (isSave == true)
+                {
+                    Snackbar.Add("Delete Successfully.", Severity.Success);
+                    LoadData();
+                }
+                else
+                {
+                    Snackbar.Add("Cannot be delete. already in used.", Severity.Info);
+                }
+            }
+            else
+            {
+                Snackbar.Add("Default data cannot be delete.", Severity.Info);
+            }
+        }
+    }
+    async Task Edit(long id)
+    {
+        master = await Task.Run(() => accountGroup.Edit(Convert.ToInt64(id)));
+        if (master.IsDefault == false)
+        {
+            
+        }
+        else
+        {
+            LoadData();
+            Snackbar.Add("Default data cannot be update & delete.", Severity.Info);
+        }
+        }
+    }

@@ -1,0 +1,364 @@
+﻿@page "/product/productedit/{id}"
+@inject IProduct product
+@inject IProductGroup group
+@inject ICategory category
+@inject ITax tax
+@inject IUnit unit
+@inject IBatch _batch
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+@*<PageTitle>Product / ProductAdd</PageTitle>*@
+<div class="content">
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Product</a></li>
+                <li class="active">Edit Product</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+<div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <h4>Edit Product</h4>
+                        </div>
+                    </div>
+                    <EditForm Model="@master" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                        <div class="panel-body">
+                            <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group row">
+                                    <label for="barcode_or_qrcode" class="col-sm-2 col-form-label">Photos <i class="text-danger"></i></label>
+                                    <div class="col-sm-10">
+                                    <div class="col-3">
+                                        @if(master.LogoPath == string.Empty)
+                                {
+												<img src="img/customer.png" height="40" width="40">
+                                }
+								else
+								{
+                                        <img src="@master.LogoPath" width="40" height="40">
+								}
+													<InputFile OnChange="OnFileChange" />
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                                                <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group row">
+                                    <label for="barcode_or_qrcode" class="col-sm-2 col-form-label">Barcode/QR-code <i class="text-danger"></i></label>
+                                    <div class="col-sm-10">
+                                        <input class="form-control"  type="text" @bind="master.PartNo" placeholder="Barcode/QR-code">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                                               
+
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group row">
+                                    <label for="product_name" class="col-sm-4 col-form-label">Product Name <i class="text-danger">*</i></label>
+                                    <div class="col-sm-8">
+                                        <input class="form-control" type="text"  placeholder="Product Name" @bind="master.ProductName">
+                                   <ValidationMessage For="@(() => master.ProductName)" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group row">
+                                    <label for="serial_no" class="col-sm-4 col-form-label">Product Code </label>
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control " @bind="master.ProductCode" placeholder="Product Code">
+                                    <ValidationMessage For="@(() => master.ProductCode)" />
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group row">
+                                    <label for="product_model" class="col-sm-4 col-form-label">Product Group <i class="text-danger">*</i></label>
+                                    <div class="col-sm-8">
+                                        <select class="form-control" @bind="master.GroupId">
+                                            <option value="0">Choose</option>
+                                            @foreach(var item in listProductGroup)
+                                            {
+                                                <option value="@item.GroupId">@item.GroupName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group row">
+                                    <label for="category_id" class="col-sm-4 col-form-label">Unit <i class="text-danger">*</i></label>
+                                    <div class="col-sm-8">
+                                        <select class="form-control" @bind="master.UnitId">
+                                            <option value="0">Choose</option>
+                                            @foreach(var item in listUnit)
+                                            {
+                                                <option value="@item.UnitId">@item.UnitName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>                        
+
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group row">
+                                    <label for="sell_price" class="col-sm-4 col-form-label">Category <i class="text-danger">*</i> </label>
+                                    <div class="col-sm-8">
+                                        <select class="form-control" @bind="master.CategoryId">
+                                            <option value="0">Choose</option>
+                                            @foreach(var item in listCategory)
+                                            {
+                                                <option value="@item.CategoryId">@item.CategoryName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div> 
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group row">
+                                    <label for="unit" class="col-sm-4 col-form-label">Brand</label>
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control " @bind="master.BrandId" placeholder="Brand">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group row">
+                                    <label for="image" class="col-sm-4 col-form-label">Model No </label>
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control " @bind="master.ModelNoId" placeholder="Model No">
+                                    </div>
+                                </div> 
+                            </div>
+                                                                            
+                            <div class="col-sm-6">
+                         <div class="form-group row">
+                            <label for="tax" class="col-sm-4 col-form-label">Size <i class="text-danger"></i></label>
+                            <div class="col-sm-7">
+                             <input type="text" class="form-control " @bind="master.SizeId" placeholder="Size">
+                            </div>
+                        </div>
+                    </div>
+               
+                                          
+                            <div class="col-sm-6">
+                         <div class="form-group row">
+                            <label for="tax" class="col-sm-4 col-form-label">Mrp <i class="text-danger"></i></label>
+                            <div class="col-sm-7">
+                              <input type="text" class="form-control " @bind="master.Mrp" placeholder="Size">
+                            </div>
+                        </div>
+                    </div>
+                                               </div>
+                                               
+
+
+                                               <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group row">
+                                    <label for="image" class="col-sm-4 col-form-label">Purchase Rate</label>
+                                    <div class="col-sm-8">
+                                        <input type="number" class="form-control " @bind="master.PurchaseRate">
+                                    </div>
+                                </div> 
+                            </div>
+                                                                            
+                            <div class="col-sm-6">
+                         <div class="form-group row">
+                            <label for="tax" class="col-sm-4 col-form-label">Sales Rate <i class="text-danger"></i></label>
+                            <div class="col-sm-7">
+                             <input type="number" class="form-control " @bind="master.SalesRate">
+                            </div>
+                        </div>
+                    </div>
+               
+                                          
+                            <div class="col-sm-6">
+                         <div class="form-group row">
+                            <label for="tax" class="col-sm-4 col-form-label">Tax <i class="text-danger"></i></label>
+                            <div class="col-sm-7">
+                                <select class="form-control" @bind="master.TaxId">
+                                            <option value="0">Choose</option>
+                                            @foreach(var item in listTax)
+                                            {
+                                                <option value="@item.TaxId">@item.TaxName</option>
+                                            }
+                                        </select>
+                            </div>
+                        </div>
+                    </div>
+                                               </div>
+                                               
+
+
+                                               <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group row">
+                                    <label for="image" class="col-sm-4 col-form-label">Maximum Stock</label>
+                                    <div class="col-sm-8">
+                                        <input type="number" class="form-control " @bind="master.MaximumStock">
+                                    </div>
+                                </div> 
+                            </div>
+                                                                            
+                            <div class="col-sm-6">
+                         <div class="form-group row">
+                            <label for="tax" class="col-sm-4 col-form-label">Minimum Stock <i class="text-danger"></i></label>
+                            <div class="col-sm-7">
+                             <input type="number" class="form-control " @bind="master.MinimumStock">
+                            </div>
+                        </div>
+                    </div>
+               
+                                          
+                            <div class="col-sm-6">
+                         <div class="form-group row">
+                            <label for="tax" class="col-sm-4 col-form-label">"Re-order level <i class="text-danger"></i></label>
+                            <div class="col-sm-7">
+                                <input type="number" class="form-control " @bind="master.ReorderLevel">
+                            </div>
+                        </div>
+                    </div>
+                                               </div>
+                                               
+
+
+                                                <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group row">
+                                    <label for="image" class="col-sm-4 col-form-label">Aallow Batch</label>
+                                    <div class="col-sm-8">
+                                        <input type="checkbox" class="form-control " @bind="master.IsallowBatch">
+                                    </div>
+                                </div> 
+                            </div>
+                                                                            
+                            <div class="col-sm-6">
+                         <div class="form-group row">
+                            <label for="tax" class="col-sm-4 col-form-label">Active <i class="text-danger"></i></label>
+                            <div class="col-sm-7">
+                             <input type="checkbox" class="form-control " @bind="master.IsActive">
+                            </div>
+                        </div>
+                    </div>
+                                               </div> 
+                        <div class="form-group row">
+                            <div class="col-sm-6">
+
+                                <button type="submit" class="btn btn-success ">Save</button>
+                                      <button type="button" class="btn btn-danger" @onclick="@Cancel">Back to List</button>
+                            </div>
+                        </div>
+                    </div>
+                    </EditForm>
+                    </div>
+            </div>
+        </div>                </div>
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+    Product master = new Product();
+    Batch batch = new Batch();
+    StockPosting posting = new StockPosting();
+    List<ProductGroup> listProductGroup = new List<ProductGroup>();
+    ProductView productOpening = new ProductView();
+    List<Category> listCategory = new List<Category>();
+    List<Tax> listTax = new List<Tax>();
+    List<Unit> listUnit = new List<Unit>();
+    List<ProductView> TodoList = new List<ProductView>();
+    public byte[] ImageUploaded { get; set; }
+    long editedID = 0;
+    string strUnitName = string.Empty;
+    protected async override void OnInitialized()
+    {
+        LoadData();
+    }
+    private void LoadData()
+    {
+        master = product.Edit(Convert.ToInt64(id));
+        listProductGroup = group.GetAll();
+        listTax = tax.GetAll();
+        listCategory = category.GetAll();
+        listUnit = unit.GetAll();
+    }
+    public void HandleValidSubmit()
+    {
+        if (master.GroupId == 0)
+        {
+            Snackbar.Add("Choose Product Group.", Severity.Info);
+        }
+        else if (master.UnitId == 0)
+        {
+            Snackbar.Add("Choose Unit.", Severity.Info);
+        }
+        else if (master.CategoryId == 0)
+        {
+            Snackbar.Add("Choose Category.", Severity.Info);
+        }
+        else if (master.MinimumStock > master.MaximumStock)
+        {
+            Snackbar.Add("MinimumStock cannot be greater then minimumstock.", Severity.Info);
+        }
+        else
+        {
+            master.Sno = string.Empty;
+            master.ModifyDate = DateTime.Now;
+            master.CompanyId = 1;
+            master.ModifyUserId = 1;
+            master.GodownId = 1;
+            master.RackId = 1;
+            var isCheck = product.CheckNameId(master.ProductCode);
+            if (isCheck == master.ProductId || isCheck == 0)
+            {
+                product.Update(master);
+                Snackbar.Add("Saved Successfully.", Severity.Success);
+                navManager.NavigateTo("/product/productlist");
+            }
+            else
+            {
+                Snackbar.Add("Already Exists.", Severity.Info);
+            }
+        }
+    }
+    async Task OnFileChange(InputFileChangeEventArgs e)
+    {
+        var format = "image/png";
+        var resizedImage = await e.File.RequestImageFileAsync(format, 300, 300);
+        var buffer = new byte[resizedImage.Size];
+        await resizedImage.OpenReadStream().ReadAsync(buffer);
+        var imageData = $"data:{format};base64,{Convert.ToBase64String(buffer)}";
+        if (imageData == null)
+        {
+            master.LogoPath = string.Empty;
+        }
+        else
+        {
+            master.LogoPath = imageData;
+        }
+    }
+    void Cancel()
+    {
+        navManager.NavigateTo("/product/productlist");
+    }
+    }

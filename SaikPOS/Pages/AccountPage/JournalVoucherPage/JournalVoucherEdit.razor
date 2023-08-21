@@ -1,0 +1,360 @@
+﻿@page "/account/journalvoucheredit/{id}"
+@inject IJournalVoucher voucher
+@inject IAccountLedger ledger
+@inject IInventorySetting settingRepository
+@using Microsoft.Data.SqlClient;
+@using Dapper
+@using System.Data
+@inject DatabaseConnection _conn
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+<div class="content  ">
+
+
+
+       
+                <ol class="breadcrumb">
+                <li><a href="#"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="#">Account</a></li>
+                <li class="active">Journal Voucher</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+
+<div class="row">
+    <div class="col-sm-12 col-md-12">
+        <div class="panel panel-bd lobidrag">
+            <div class="panel-heading">
+                <div class="panel-title">
+                    <h4>
+                     Journal Voucher                    </h4>
+                </div>
+            </div>
+            <div class="panel-body">
+                     <div class="form-group row">
+                        <label for="vo_no" class="col-sm-2 col-form-label">Voucher No<i class="text-danger">*</i></label>
+                        <div class="col-sm-4">
+                             @if (setting.VoucherNoAutomatic == true)
+                                {
+                                    <input type="text" @bind="master.VoucherNo" readonly class="form-control" />
+                                }
+                                else
+                                {
+                                    <input type="text" @bind="master.VoucherNo" class="form-control" />
+                                }
+                        </div>
+                    </div> 
+                    
+                     <div class="form-group row">
+                        <label for="date" class="col-sm-2 col-form-label">Date<i class="text-danger">*</i></label>
+                        <div class="col-sm-4">
+                             <input type="date" class="form-control datepicker hasDatepicker" @bind="master.Date">
+                        </div>
+                    </div> 
+                    <div class="form-group row">
+                        <label for="txtRemarks" class="col-sm-2 col-form-label">Remark</label>
+                        <div class="col-sm-4">
+                          <textarea class="form-control" @bind="master.Narration"></textarea>
+                        </div>
+                    </div> 
+                       <div class="table-responsive">
+                           <table id="myTable" class="table table-bordered table-hover" aria-describedby="myTable_info" role="grid">
+                        <thead>
+                               <tr>
+                            <td>S.No</td>
+                            <td>Ledger Name</td>
+                            <td>Debit</td>
+                            <td>Credit</td>
+                            <td>Narration</td>
+                            <td></td>
+                        </tr>
+                        </thead>
+                        @for (var i = 0; i < master.Addresses.Count; i++)
+                        {
+                            var index = i;
+                            var address = master.Addresses[i];
+
+                            <tr>
+                                <td class=" align-middle">
+                                    @(i+1)
+                                </td>
+                                <td class=" align-middle">
+                                    <select class="form-control" @bind="address.LedgerId" style="width:300px;">
+                                        <option value="0">Choose Ledger</option>
+                                        @foreach(var item in subledger)
+                                            {
+                                                <option value="@item.LedgerId">@item.LedgerName</option>
+                                            }
+                                        </select>
+                                </td>
+                                <td class=" align-middle">
+                                    <input type="text" @bind="address.Debit" @onkeyup="Calculate" @bind:event="oninput" />
+                                </td>
+                                <td class=" align-middle">
+                                    <input type="text" @bind="address.Credit" @onkeyup="Calculate" @bind:event="oninput" />
+                                </td>
+                                <td class=" align-middle">
+                                    <input type="text" style="width:300px;" @bind="address.Description" @bind:event="oninput" />
+                                </td>
+                                <td>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" @onclick="@(() => Remove(index))"></MudIconButton>
+                                </td>
+                            </tr>
+                        }
+                        <tfoot>
+                                    <tr>
+                                      <td>
+                                           
+                                        </td>
+                                        <td colspan="1" class="text-right"><label for="reason" class="  col-form-label">Total</label>
+                                           </td>
+                                        <td class="text-right">
+                                            <input type="text" class="form-control text-right " @bind="@decDebit" readonly="readonly">
+                                        </td>
+                                         <td class="text-right">
+                                            <input type="text" class="form-control text-right" @bind="@decCredit" readonly="readonly">
+                                        </td>
+                                        <td>
+
+                                        </td>
+                                        <td>
+                                            <a id="add_more" class="btn btn-info" name="add_more" @onclick="@(() =>AddJournal())"><i class="fa fa-plus"></i></a></td>
+                                    </tr>
+                                </tfoot>
+                    </table>
+                        </div>
+                        <div class="form-group row">
+                           
+                            <div class="col-sm-12 text-right">
+
+                               <button type="button" class="btn btn-success" @onclick="(() => SvejournlVoucher())">Save</button>
+                    <button type="button" class="btn btn-danger" @onclick=@Cancel>Cancel</button>
+                            </div>
+                        </div>
+                             </div>  
+        </div>
+        <input type="hidden" id="headoption" value="<option value=''>Select One</option><option value='502000001'>1-Anderson</option><option value='502040001'>1-JasonHenry</option><option value='102030000001'>1-Walking Customer</option><option value='102030000010'>10-Julian</option><option value='102030000002'>2-Jhon</option><option value='502040002'>2-Justine smith</option><option value='502000002'>2-Nelson</option><option value='102030000003'>3-Luther</option><option value='502000003'>3-Mark</option><option value='102030000004'>4-Harper</option><option value='502000004'>4-Hudson</option><option value='102030000005'>5-Emily</option><option value='502000005'>5-Michell </option><option value='102030000006'>6-Gidian</option><option value='502000006'>6-Justin</option><option value='102030000007'>7-Louice </option><option value='502000007'>7-willam</option><option value='102030000008'>8-Roland </option><option value='102030000009'>9-Justin</option><option value='1020101'>Cash In Hand</option><option value='101080002'>Customer Service-2</option><option value='101080003'>Customization Service-3</option><option value='401'>Default expense</option><option value='403'>Employee Salary</option><option value='101080001'>Home Delivery -1</option><option value='402'>Product Purchase</option><option value='303'>Product Sale</option><option value='304'>Service Income</option><option value='10108'>Service Receive</option>" name="">
+    </div>
+</div>
+
+
+                </div>
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+    InventorySetting setting = new InventorySetting();
+    JournalMaster master = new JournalMaster();
+    List<JournlVoucherView> articleModel;
+    List<AccountLedgerView> subledger = new List<AccountLedgerView>();
+    List<JournlDetilsView> TodoList = new List<JournlDetilsView>();
+    JournlDetilsView journldet = new JournlDetilsView();
+    List<DeleteItem> deleteNo = new List<DeleteItem>();
+    long editedID = 0;
+    string strSerialNo;
+    string strPrefix;
+    string strSuffix;
+    decimal decDebit = 0;
+    decimal decCredit = 0;
+    decimal decTotl = 0;
+    protected async override void OnInitialized()
+    {
+        master = voucher.EditJournalVoucher(Convert.ToInt64(id));
+        master.Addresses = voucher.JournalVoucherView(Convert.ToInt64(id));
+
+        decimal decDebits = 0;
+        decimal decCredits = 0;
+        decimal decD = 0;
+        decimal decC = 0;
+        @for (var i = 0; i < master.Addresses.Count; i++)
+        {
+            var address = master.Addresses[i];
+            decD = decD + address.Debit;
+            decC = decC + address.Credit;
+        }
+        decDebit = decD;
+        decCredit = decC;
+        LoadData();
+        StateHasChanged();
+    }
+    protected void LoadData()
+    {
+        subledger = ledger.GetAll(1);
+        journldet.AccountGroupId = 0;
+        master.Addresses.Add(new JournalDetails());
+    }
+    protected void SvejournlVoucher()
+    {
+            if (TodoList == null)
+            {
+                Snackbar.Add("Invalid Entry.", Severity.Info);
+                return;
+            }
+            else if (master.VoucherNo == string.Empty)
+            {
+                Snackbar.Add("Type voucher.", Severity.Info);
+            }
+            else if (decDebit != decCredit)
+            {
+                Snackbar.Add("Debit & Credit Amount must be equal.", Severity.Info);
+                return;
+            }
+            else
+            {
+                    SqlConnection sqlcon = new SqlConnection(_conn.DbConn);
+                    sqlcon.Open();
+                    SqlTransaction sql = sqlcon.BeginTransaction();
+
+                    //DeleteJournalVoucher
+                var paraScDelete = new DynamicParameters();
+                paraScDelete.Add("@JournalMasterId", master.JournalMasterId);
+                paraScDelete.Add("@VoucherTypeId", 6);
+                paraScDelete.Add("@VoucherNo", master.VoucherNo);
+                paraScDelete.Add("@YearId", master.FinancialYearId);
+                paraScDelete.Add("@CompanyId", master.CompanyId);
+                var valueScDelete = sqlcon.Query<long>("JournalVoucherDelete", paraScDelete, sql, true, 0, commandType: CommandType.StoredProcedure);
+
+                    var para = new DynamicParameters();
+                    para.Add("@SerialNo", master.SerialNo);
+                    para.Add("@VoucherNo", master.VoucherNo);
+                    para.Add("@InvoiceNo", string.Empty);
+                    para.Add("@SuffixPrefixId", 0);
+                    para.Add("@Date", master.Date);
+                    para.Add("@NepaliDate", string.Empty);
+                    para.Add("@TotalAmount", decDebit);
+                    para.Add("@RasidNo", string.Empty);
+                    para.Add("@ReceiptNo", string.Empty);
+                    para.Add("@Rakam", 0);
+                    para.Add("@Prepairedby", string.Empty);
+                    para.Add("@PreparedBypost", string.Empty);
+                    para.Add("@Checkedby", string.Empty);
+                    para.Add("@Checkedbypost", string.Empty);
+                    para.Add("@Receivedby", string.Empty);
+                    para.Add("@ReceivePost", string.Empty);
+                    para.Add("@Swikritiby", string.Empty);
+                    para.Add("@SwikritibyPost", string.Empty);
+                    para.Add("@VoucherTypeId", 6);
+                    para.Add("@UserId", master.UserId);
+                    para.Add("@FinancialYearId", 1);
+                    para.Add("@CompanyId", 1);
+                    para.Add("@AddedDate", DateTime.Now);
+                    para.Add("@CreatedBy", 1);
+                    para.Add("@MemIDOUT", dbType: DbType.Int64, direction: ParameterDirection.Output);
+                    sqlcon.Execute("JournalMasterInsert", para, sql, 0, CommandType.StoredProcedure);
+                    long MemID = para.Get<long>("MemIDOUT");
+                    if (MemID > 0)
+                    {
+
+                        @for (var i = 0; i < master.Addresses.Count; i++)
+                        {
+                            var index = i;
+                            var address = master.Addresses[i];
+
+                            var paraOpening = new DynamicParameters();
+                            paraOpening.Add("@JournalMasterId", MemID);
+                            paraOpening.Add("@LedgerId", address.LedgerId);
+                            paraOpening.Add("@Debit", address.Debit);
+                            paraOpening.Add("@Credit", address.Credit);
+                            paraOpening.Add("@Description", address.Description);
+                            paraOpening.Add("@ExchangeRateId", 1);
+                            paraOpening.Add("@ChequeNo", string.Empty);
+                            paraOpening.Add("@ChequeDate", string.Empty);
+                            paraOpening.Add("@JourDId", dbType: DbType.Int64, direction: ParameterDirection.Output);
+                            sqlcon.Execute("JournalDetailsInsert", paraOpening, sql, 0, CommandType.StoredProcedure);
+                            long journaldetId = paraOpening.Get<long>("JourDId");
+
+                            ////LedgerPosting
+                            var paraLedger = new DynamicParameters();
+                            paraLedger.Add("@Date", master.Date);
+                            paraLedger.Add("@NepaliDate", master.NepaliDate);
+                            paraLedger.Add("@LedgerId", address.LedgerId);
+                            paraLedger.Add("@Debit", address.Debit);
+                            paraLedger.Add("@Credit", address.Credit);
+                            paraLedger.Add("@VoucherNo", master.VoucherNo);
+                            paraLedger.Add("@DetailsId", journaldetId);
+                            paraLedger.Add("@YearId", 1);
+                            paraLedger.Add("@InvoiceNo", string.Empty);
+                            paraLedger.Add("@VoucherTypeId", 6);
+                            paraLedger.Add("@CompanyId", 1);
+                            paraLedger.Add("@LongReference", master.Narration);
+                            paraLedger.Add("@ReferenceN", address.Description);
+                            paraLedger.Add("@ChequeNo", string.Empty);
+                            paraLedger.Add("@ChequeDate", string.Empty);
+                            paraLedger.Add("@AddedDate", DateTime.Now);
+                            var value = sqlcon.Query<long>("LedgerPostingInsert", paraLedger, sql, true, 0, commandType: CommandType.StoredProcedure);
+                        }
+
+                    }
+                    sql.Commit();
+                    Snackbar.Add("Updated Successfully.", Severity.Info);
+                    LoadData();
+                    JsRuntime.InvokeAsync<object>("open", new object[] { ($"/account/journalvoucherprint/{MemID}"), "_blank" });
+                    navManager.NavigateTo("account/journalvoucherlist");
+            }
+    }
+
+    void Remove(int index)
+    {
+        if (index > 1)
+        {
+            master.Addresses.RemoveAt(index);
+            decimal decD = 0;
+            decimal decC = 0;
+            @for (var i = 0; i < master.Addresses.Count; i++)
+            {
+                var address = master.Addresses[i];
+                decD = decD + address.Debit;
+                decC = decC + address.Credit;
+            }
+            decDebit = decD;
+            decCredit = decC;
+        }
+        else
+        {
+            Snackbar.Add("Default value cannot be delete.", Severity.Info);
+        }
+    }
+    void Calculate()
+    {
+        decimal decD = 0;
+        decimal decC = 0;
+        @for (var i = 0; i < master.Addresses.Count; i++)
+        {
+            var address = master.Addresses[i];
+            decD = decD + address.Debit;
+            decC = decC + address.Credit;
+        }
+        decDebit = decD;
+        decCredit = decC;
+    }
+    void AddJournal()
+    {
+        decimal decD = 0;
+        decimal decC = 0;
+        for (var i = 0; i < master.Addresses.Count; i++)
+        {
+
+            if (master.Addresses[i].LedgerId == 0)
+            {
+                Snackbar.Add("Choose Ledger.", Severity.Info);
+                //master.Addresses.RemoveAt(i);
+            }
+            else
+            {
+                master.Addresses.Add(new JournalDetails());
+                var address = master.Addresses[i];
+                decD = decD + address.Debit;
+                decC = decC + address.Credit;
+            }
+        }
+        decDebit = decD;
+        decCredit = decC;
+    }
+    void Cancel()
+    {
+        navManager.NavigateTo("account/journalvoucherlist");
+    }
+}

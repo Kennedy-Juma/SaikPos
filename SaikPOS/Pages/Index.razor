@@ -1,0 +1,268 @@
+﻿@page "/"
+@inject IInventoryReport reportRepository
+@using Radzen
+@using System.Globalization
+<AuthorizeView Roles="Admin">
+<div class="content">
+
+
+
+       
+                <ol class="breadcrumb">
+                    <li>
+                        <Radzen.Blazor.RadzenSwitch @bind-Value=@value Style="margin-bottom: 20px" Change=@(args => OnChange(args, "Switch")) />
+                    </li>
+            </ol>
+            
+            @if (value == false)
+                {
+
+                }
+                else
+                {
+                    <!-- load messages -->
+                                        <div class="se-pre-con"></div>
+                    <!-- load custom page -->
+                    
+                
+        <div class="row">
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-3">
+                 <div class="small-box bg-green whitecolor">
+            <div class="inner">
+                <i class="fa fa-money"></i>
+              <h4><span class="count-number">@CashAmount</span></h4>
+              <p>You'll Receive</p>
+            </div>
+                  </div>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-3">
+                <div class="small-box bg-pase whitecolor">
+            <div class="inner">
+                <i class="fa fa-money"></i>
+              <h4><span class="count-number">@PymentCashAmount</span></h4>
+
+              <p>You'll Pay</p>
+            </div>
+                      </div>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-3">
+         <div class="small-box bg-bringal whitecolor">
+            <div class="inner">
+                <i class="fa fa-money"></i>
+              <h4><span class="count-number">@totalSale</span></h4>
+
+              <p>Total Sales</p>
+            </div>
+                      </div>
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-3">
+            <div class="small-box bg-darkgreen whitecolor">
+            <div class="inner">
+                <i class="fa fa-money"></i>
+              <h4><span class="count-number">@totalPurchase</span> </h4>
+
+              <p>Total Purchase</p>
+            </div>
+                       </div>
+            </div>
+        </div>
+        <hr>
+       
+                  <div class="row">
+                <!-- This month progress -->
+                <div class="col-sm-12 col-md-7">
+                    <div class="panel panel-bd">
+                        <div class="panel-heading">
+                            <div class="panel-title">
+                                <h4 class="best-sale-title"> Sales Transaction</h4>
+                                </div>
+                        </div>
+                        <div class="panel-body">
+                                <Radzen.Blazor.RadzenChart>
+                                    <Radzen.Blazor.RadzenLineSeries Smooth="@smooth" Data="@saleslist" CategoryProperty="Date" Title="Sales" ValueProperty="GrandTotal">
+                                        <Radzen.Blazor.RadzenMarkers MarkerType="Radzen.Blazor.MarkerType.Circle" />
+                                    </Radzen.Blazor.RadzenLineSeries>
+                                    <Radzen.Blazor.RadzenCategoryAxis Padding="2" FormatString="{0:MMM}" />
+                                    <Radzen.Blazor.RadzenValueAxis Formatter="@FormatAsUSD">
+                                        <Radzen.Blazor.RadzenGridLines Visible="true" />
+                                        <Radzen.Blazor.RadzenAxisTitle Text="Sales Chart" />
+                                    </Radzen.Blazor.RadzenValueAxis>
+                                </Radzen.Blazor.RadzenChart>
+
+</div>
+                    </div>
+                </div>
+                 <div class="col-sm-12 col-md-5">
+                    <div class="panel panel-bd">
+                        <div class="panel-heading">
+                            <div class="panel-title">
+                                  <div class="form-group row">
+                                    <div class="col-sm-8 marginpadding-right0">
+<h4 class="best-sale-title"> Top 10 Product</h4>
+                                  </div>
+                                  <div class="col-sm-2 marginpaddingleft0">
+                              </div>
+                                </div>
+                                                            </div>
+                            <div class="panel-body">
+                             <div id="chartContainer" class="piechartcontainer">
+                                 <Radzen.Blazor.RadzenChart>
+                    <Radzen.Blazor.RadzenPieSeries Data="@topProduct" Title="Qty" CategoryProperty="ProductName" ValueProperty="qty" />
+                </Radzen.Blazor.RadzenChart>
+</div>
+                            
+                                 
+                                 </div>
+                        </div>
+                        </div>
+                        </div>
+
+                   <!-- This today transaction progress -->
+                <div class="col-sm-12 col-md-12">
+                    <div class="panel panel-bd">
+                        <div class="panel-heading">
+                            <div class="panel-title">
+                                <h4 class="charttitle"> Top 5 Receiable</h4>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="table-responsive todayssaletitle">
+                                <table class="table table-bordered table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>S.No.</th>
+                                            <th>Customer Name</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                            @{
+                                                int sno = 0;
+                                            }
+                                            @foreach (var report in toprecible)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @{sno++;}
+                                                        @sno
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex flex-row">
+                                                            <div class="ml-6">
+                                                                @report.LedgerName
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        @report.Debit
+                                                    </td>
+                                                </tr>
+                                            }
+                                                                            </tbody>
+                                    <tfoot>
+                                        
+                                        <tr>
+                                            <td></td>
+                                            <td colspan="1" align="right">&nbsp;<b>Total:</b></td>
+                                            <td class="text-right">
+                                                @toprecible.Sum(i => i.Debit)
+                                                </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            
+                        </div>
+
+                        
+                    </div>
+                
+                </div>     
+            </div>
+                }
+               </div>
+               </AuthorizeView>
+                @code{
+    BillingReport report = new BillingReport();
+    BillingReport income = new BillingReport();
+    BillingReport reading = new BillingReport();
+    List<BillingReport> final = new List<BillingReport>();
+    List<SalesMasterView> saleslist;
+    List<PurchaseMasterView> purchaselist;
+
+    bool value = true;
+    decimal totalCustomer;
+    decimal totalSupplier;
+    decimal totalSale;
+    decimal totalPurchase;
+    decimal CashAmount;
+    decimal creditAmount;
+    decimal customerCredit;
+    decimal PymentCashAmount;
+    decimal PymentcreditAmount;
+    decimal pymentDebit;
+    //ReminderStock
+    List<FinancialReport> toprecible { get; set; }
+    List<FinancialReport> toppyble { get; set; }
+    List<FinancialReport> topProduct { get; set; }
+    bool smooth = false;
+
+    protected override void OnInitialized()
+    {
+        LoadData();
+        StateHasChanged();
+
+    }
+    protected async void LoadData()
+    {
+        //salesgraph
+        saleslist = reportRepository.SalesInvoiceViewGraph(1, 1);
+        //purchasegraph
+        //purchaselist = reportRepository.ViewAllPurchseInvoiceGraph(1, 1);
+
+
+        var resultSlesPurchse = reportRepository.SalesPurchaseTotal(1); //GetTotalSales&Purchase
+        totalSale = resultSlesPurchse.totalSale;
+        totalPurchase = resultSlesPurchse.totalPurchase;
+
+        var resultSales = reportRepository.Receive(1); //GetYouWillReceive
+        CashAmount = resultSales.Purchase;
+
+        var resultPyment = reportRepository.Pay(1); //GetYouWillPay
+        PymentCashAmount = resultPyment.Payment;
+
+        toprecible = reportRepository.TopReceive(1); //GetTopTenReceiable
+        topProduct = reportRepository.GettopProduct(1); //GetTopTenProduct
+    }
+    public List<ChartSeries> Series = new List<ChartSeries>()
+    {
+        new ChartSeries() { Name = "Series 1", Data = new double[] { 90, 79, 72, 69, 62, 62, 55, 65, 70 } },
+        new ChartSeries() { Name = "Series 2", Data = new double[] { 10, 41, 35, 51, 49, 62, 69, 91, 148 } },
+    };
+    public string[] XAxisLabels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep" };
+
+    Random random = new Random();
+    public void RandomizeData()
+    {
+        var new_series = new List<ChartSeries>()
+        {
+            new ChartSeries() { Name = "Series 1", Data = new double[9] },
+            new ChartSeries() { Name = "Series 2", Data = new double[9] },
+        };
+        for (int i = 0; i < 9; i++)
+        {
+            new_series[0].Data[i] = random.NextDouble() * 100;
+            new_series[1].Data[i] = random.NextDouble() * 100;
+        }
+        Series = new_series;
+        StateHasChanged();
+    }
+    void OnChange(bool? value, string name)
+    {
+        value = true;
+    }
+   string FormatAsUSD(object value)
+    {
+        return ((double)value).ToString("C0", CultureInfo.CreateSpecificCulture("en-US"));
+    }
+     }

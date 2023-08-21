@@ -1,0 +1,118 @@
+﻿@page "/income/incomevoucherlist"
+@inject ILocalStorageService sessionStorage
+@inject IncomeVoucherRepository incomeRepository
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+<div class="content">
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Income</a></li>
+                <li><a href="/">Income</a></li>
+                <li class="active">Income Voucher</li>
+            </ol>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <span>Income Voucher</span>
+                            <span class="padding-lefttitle">
+                                <a href="/income/incomevoucheradd" class="btn btn-info m-b-5 m-r-2"><i class="ti-plus"> </i> Add IncomeVoucher </a>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div id="printableArea">
+
+                            
+                            <div class="table-responsive">
+                            <MudTable Items="@articleModel" Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Filter="new Func<IncomeVoucherView,bool>(Search)">
+    <ToolBarContent>
+        <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>VoucherNo</MudTh>
+        <MudTh>Income</MudTh>
+        <MudTh>Date</MudTh>
+        <MudTh>VoucherType</MudTh>
+        <MudTh>Amount</MudTh>
+        <MudTh>Status</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="LedgerName">@context.VoucherNo</MudTd>
+        <MudTd DataLabel="LedgerCode">@context.LedgerName</MudTd>
+        <MudTd DataLabel="AccountGroupName">@context.Date</MudTd>
+        <MudTd DataLabel="Address">@context.VoucherTypeName</MudTd>
+        <MudTd DataLabel="Email">@context.Amount</MudTd>
+        <MudTd DataLabel="">
+            <a href="/income/incomevoucheredit/@context.IncomeMasterId" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="left" title="" data-original-title="Income Details"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+            <a @onclick="() => Delete(context.IncomeMasterId)" class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="left" title="Update"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+                                                                                
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[] {10, 20, 50, 100}" />
+    </PagerContent>
+</MudTable>
+                        </div>
+            </div><!-- /.table -->
+        </div><!-- /.card-body -->
+    </div>
+</div>
+</div>
+</div>
+
+@code {
+    private bool dense = true;
+    private bool hover = true;
+    private bool striped = true;
+    private bool bordered = true;
+    private string searchString1 = "";
+    private string searchString2 = "";
+    List<IncomeVoucherView> articleModel;
+    string voucherNo = string.Empty;
+    Privilege privi = new Privilege();
+    //GetSessionInfo
+    long decIncomeVoucherTypeId = 31;
+    protected async override void OnInitialized()
+    {
+        
+        LoadData();
+        StateHasChanged();
+    }
+    protected void LoadData()
+    {
+        articleModel = incomeRepository.IncomeView(1, 1);
+    }
+
+    async Task Delete(long id)
+    {
+            bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+            if (confirmed)
+            {
+                bool isSave = false;
+                isSave = incomeRepository.IncomeVoucherDelete(id, decIncomeVoucherTypeId);
+                if (isSave == true)
+                {
+                    Snackbar.Add("Delete Successfully.", Severity.Info);
+                    LoadData();
+                }
+                else
+                {
+                    Snackbar.Add("Cannot be delete. already in used.", Severity.Info);
+                }
+            }
+    }
+    private bool Search(IncomeVoucherView element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString1))
+            return true;
+        if (element.LedgerName.Contains(searchString1, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.VoucherNo.Contains(searchString1, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+}

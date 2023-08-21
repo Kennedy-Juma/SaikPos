@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.33130.400
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{DF1DD7AE-FE59-4936-9251-196D5B54AA1D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SaikPOS", "SaikPOS\SaikPOS.csproj", "{DA389A5F-B275-480E-BD04-49B227505439}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DF1DD7AE-FE59-4936-9251-196D5B54AA1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF1DD7AE-FE59-4936-9251-196D5B54AA1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF1DD7AE-FE59-4936-9251-196D5B54AA1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF1DD7AE-FE59-4936-9251-196D5B54AA1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA389A5F-B275-480E-BD04-49B227505439}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA389A5F-B275-480E-BD04-49B227505439}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA389A5F-B275-480E-BD04-49B227505439}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA389A5F-B275-480E-BD04-49B227505439}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ADACC2B2-E707-49A7-B72A-59305ADFA4B3}
+	EndGlobalSection
+EndGlobal

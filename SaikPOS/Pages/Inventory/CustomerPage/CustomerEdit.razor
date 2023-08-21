@@ -1,0 +1,253 @@
+﻿@page "/sales/customeredit/{id}"
+@inject IAccountLedger accountLedger
+@inject IAccountGroup accountGroup
+@inject IArea area
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+<div class="content">
+
+
+
+       
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Sales</a></li>
+                <li class="active">Edit Customer</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                     <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <h4>Edit Customer </h4>
+                        </div>
+                    </div>
+                   
+                    <div class="panel-body">
+                            	<EditForm Model="@master" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                                <div class="form-group row">
+                                     <label for="customer_mobile" class="col-sm-2 text-right col-form-label">Customer Name <i class="text-danger">  </i>:</label>
+                                    <div class="col-sm-12">
+                                        <div class="">
+                                           
+                                            <input type="text" @bind="master.LedgerName" class="form-control input-mask-trigger text-left" placeholder="LedgerName">
+    
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                                 <div class="form-group row">
+                                    <label for="customer_email" class="col-sm-2 text-right col-form-label">Customer Code:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           
+                                            <input type="text" class="form-control input-mask-trigger" @bind="master.LedgerCode" placeholder="LedgerCode" readonly>
+    
+                                        </div>
+                                       
+                                    </div>
+                                    <label for="phone" class="col-sm-2 text-right col-form-label">Area:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                            <select class="form-control" @bind="master.AreaId">
+                                               @foreach(var item in listArea)
+                                        {
+                                        <option value="@item.AreaId">@item.AreaName</option>
+
+                                        }
+                                           </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row"> 
+                                    <label for="fax" class="col-sm-2 text-right col-form-label">WebSite:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="text" class="form-control"  @bind="master.Website" placeholder="WebSite">
+                                        </div>
+                                       
+                                    </div>
+                                    <label for="city" class="col-sm-2 text-right col-form-label">Phone:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="text" class="form-control"  @bind="master.Phone" placeholder="Phone">
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="state" class="col-sm-2 text-right col-form-label">Mobile:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="text" class="form-control"  @bind="master.Mobile" placeholder="Mobile">
+                                        </div>
+                                       
+                                    </div>
+                                    <label for="zip" class="col-sm-2 text-right col-form-label">Email:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="text" class="form-control"  @bind="master.Email" placeholder="Email">
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="country" class="col-sm-2 text-right col-form-label">Credit Period:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="number" class="form-control"  @bind="master.CreditPeriod">
+                                        </div>
+                                       
+                                    </div>
+                                    
+                                     <label for="previous_balance" class="col-sm-2 text-right col-form-label">Credit Limit:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="number" class="form-control"  @bind="master.CreditLimit">
+                                        </div>
+                                       
+                                    </div>
+                                                                    
+                                </div>
+
+                                 <div class="form-group row">
+                                    <label for="country" class="col-sm-2 text-right col-form-label">Country:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="text" class="form-control"  @bind="master.Country">
+                                        </div>
+                                       
+                                    </div>
+                                    
+                                     <label for="previous_balance" class="col-sm-2 text-right col-form-label">State:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="text" class="form-control"  @bind="master.State">
+                                        </div>
+                                       
+                                    </div>
+                                                                    
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="country" class="col-sm-2 text-right col-form-label">City:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="text" class="form-control"  @bind="master.Mnucapality">
+                                        </div>
+                                       
+                                    </div>
+                                    
+                                     <label for="previous_balance" class="col-sm-2 text-right col-form-label">Refer From:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <select class="form-control" @bind="@master.Referfrom">
+                                        <option value="Previous Customer">Previous Customer</option>
+                                        <option value="Facebook">Facebook</option>
+                                        <option value="Twitter">Twitter</option>
+                                        <option value="Instagram">Instagram</option>
+                                        <option value="Instagram">Friend</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                        </div>
+                                       
+                                    </div>
+                                                                    
+                                </div>
+
+                                <div class="form-group row">
+                                    <label for="country" class="col-sm-2 text-right col-form-label">Remarks:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <textarea type="text" class="form-control"  @bind="master.Narration"></textarea>
+                                        </div>
+                                       
+                                    </div>
+                                    
+                                     <label for="previous_balance" class="col-sm-2 text-right col-form-label">Active:</label>
+                                    <div class="col-sm-4">
+                                        <div class="">
+                                           <input type="checkbox" class="form-control"  @bind="master.IsDefault">
+                                        </div>
+                                       
+                                    </div>
+                                                                    
+                                </div>
+                         <div class="form-group row">
+                                   <div class="col-sm-6 text-right">
+                                   </div>
+                                     <div class="col-sm-6 text-right">
+                                        <div class="">
+                                           <button type="submit" class="btn btn-success ">Save</button>
+                                      <button type="button" class="btn btn-danger" @onclick="@Cancel">Back to List</button>
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                               
+
+                                </EditForm>                     </div>
+                        </div>
+                    </div>
+                </div>
+               
+                </div>
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+    AccountLedger master = new AccountLedger();
+    List<Area> listArea = new List<Area>();
+    protected async override void OnInitialized()
+    {
+        LoadData();
+    }
+    private void LoadData()
+    {
+        master = accountLedger.Edit(Convert.ToInt64(id));
+        master.Referfrom = "Previous Customer";
+        listArea = area.GetAll();
+    }
+    public void HandleValidSubmit()
+    {
+            master.AccountGroupId = 26;
+            master.LogoPathC = string.Empty;
+            master.PricinglevelId = 1;
+            master.RouteId = 1;
+            master.SkypeID = string.Empty;
+            master.Twitter = string.Empty;
+            master.Facebook = string.Empty;
+            master.instagram = string.Empty;
+            master.MailingName = string.Empty;
+            master.BranchCode = string.Empty;
+            master.BankAccountNumber = string.Empty;
+            master.Street = string.Empty;
+            master.ZipCode = string.Empty;
+            master.Map = string.Empty;
+            master.ModifyDate = DateTime.Now;
+            master.CompanyId = 1;
+            master.ModifyBy = 1;
+            bool isSave = false;
+            isSave = accountLedger.Update(master);
+            if (isSave == true)
+            {
+                Snackbar.Add("Updated Successfully.", Severity.Success);
+                LoadData();
+                navManager.NavigateTo("sales/customerlist");
+            }
+            else
+            {
+                Snackbar.Add("Already Exists.", Severity.Info);
+            }
+    }
+    void Cancel()
+    {
+        navManager.NavigateTo("sales/customerlist");
+    }
+    }

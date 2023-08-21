@@ -1,0 +1,624 @@
+﻿@page "/purchase/purchaseinvoicedetails/{id}"
+@inject ICompany company
+@inject IPurchaseInvoice purchaseInvoiceRepository
+@inject IPaymentSupplier paymentSupplier
+@inject IAccountLedger accountLedger;
+@inject IInventorySetting settingRepository
+@using System.Net;
+@using System.Text;
+@using System.Collections.Specialized;
+@using Microsoft.Data.SqlClient
+@using Dapper
+@using System.Data
+@using System.Net.Mail
+@inject DatabaseConnection _conn
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+@*<PageTitle>Purchase / PurchaseDetails</PageTitle>*@
+<div class="content">
+                <ol class="breadcrumb">
+                <li><a href="#"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="#">purchase</a></li>
+                <li class="active">Purchase Details</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                    
+		<div class="row">
+		    <div class="col-sm-12">
+		        <div class="panel panel-bd lobidrag">
+		            <div class="panel-heading">
+		                <div class="panel-title">
+		                    <span>Purchase Details</span>
+							<span class="print-button">
+                                    <a href="/purchase/purchaseinvoiceedit/@id" class="btn btn-success">
+            <i class="fa  fa-edit"></i> Edit
+          </a>
+          <a @onclick="ModalShowPay" style="color:#ffffff;" class="btn btn-success" title="Pop Up"><i class="fa fa-money"></i> Make Payment</a>
+          <a onclick="printDiv('PrintDiv')" class="btn btn-warning">
+              <i class="fa fa-print"></i> 
+            Print
+          </a>
+          @*<a href="" target="_blank" class="btn btn-primary">
+              <i class="fa fa-file-pdf-o"></i> 
+            PDF
+          </a>*@
+          <a @onclick="SendEmail" class="btn btn-primary">
+              <i class="fa fa-credit-card"></i> 
+            Email
+          </a>
+          <a href="/" class="btn btn-danger">
+            <i class="fa  fa-undo"></i> Back to list
+          </a>
+                                 </span>
+		                </div>
+		            </div>
+		            <div class="panel-body" id="PrintDiv">
+		    
+           <div class="row purchasedetails-header">
+                                
+                                <div class="col-sm-7 purchasedetails-address">
+
+                                                                        <img src="@convertImageToDisplay(companyView.LogoPath)" width="70" height="40" class="" alt="">
+                                    <br>  <br>
+                                      
+                                    <span class="label label-success-outline m-r-15 p-10">Billing From</span>
+                                    <address>
+                                        <strong class="companyname">@companyView.CompanyName</strong><br>
+                                        @companyView.Address<br>
+                                        <abbr><b>Mobile:</b></abbr>@companyView.Phone <br>
+                                        <abbr><b>Email:</b></abbr> 
+                                       SaikPOSapps@gmail.com <br>
+                                        <abbr><b>Website:</b></abbr> 
+                                       SaikPOSapps.com<br>
+                                                                                
+                                    </address>
+                                   
+                                  
+
+                                </div>
+                                
+                                 
+                                <div class="col-sm-4 text-left invoice-details-billing">
+                                    <h2 class="m-t-0">Purchase</h2>
+                                    <div>Voucher No: @master.VoucherNo</div>
+                                    <div class="m-b-15">Billing Date: @master.Date</div>
+
+                                    <span class="label label-success-outline m-r-15">Billing To</span>
+
+                                    <address class="details-address">  
+                                        <strong class="companyname">@master.LedgerName </strong><br>
+                                       
+                                    </address>
+                                </div>
+                            </div> 
+
+                          <br>
+
+
+		                <div class="table-responsive paddin5ps">
+		                    <table class="table table-bordered table-striped table-hover">
+								<thead>
+									<tr>
+										<th style="width:30px;">S.No</th>
+                                <th>Product Name</th>
+                                <th>Unit</th>
+                                <th class="text-right">Qty</th>
+                                <th class="text-right">Rate</th>
+                                <th class="text-right">Discount</th>
+                                <th class="text-right">Total Amount</th>
+									</tr>
+								</thead>
+								<tbody>
+                                        @{
+                                int sno = 0;
+                            }
+                            @foreach (var td in TodoList)
+                            {
+                                <tr valign="top">
+                                    <td>
+                                        @{sno++;}
+                                        @sno
+                                    </td>
+                                    <td>
+                                        @td.ProductName<br>
+
+                                    </td>
+                                    <td>@td.UnitName</td>
+                                    <td align="right">@td.Qty</td>
+                                    <td class="text-right">@td.Rate</td>
+                                        <td align="right">@td.DiscountAmount</td>
+                                    <td align="right">@td.TotalAmount </td>
+                                </tr>
+                            }
+								
+																</tbody>
+								<tfoot>
+									<tr>
+										<td class="text-right" colspan="6"><b>Total:</b></td>
+										<td class="text-right"><b>@master.TotalAmount</b></td>
+									</tr>
+                                    <tr>
+										<td class="text-right" colspan="6"><b>Bill Discount:</b></td>
+										<td class="text-right"><b>@master.BillDiscount</b></td>
+									</tr>
+                                    <tr>
+										<td class="text-right" colspan="6"><b>Vat:</b></td>
+										<td class="text-right"><b>@master.TotalTax</b></td>
+									</tr>
+									 									<tr>
+										<td class="text-right" colspan="6"><b>Grand Total:</b></td>
+										<td class="text-right"><b>@master.GrandTotal</b></td>
+									</tr>
+									                               									<tr>
+										<td class="text-right" colspan="6"><b>Due Amount:</b></td>
+										<td class="text-right"><b>@balanceDue</b></td>
+									</tr>
+																</tfoot>
+		                    </table>
+		                </div>
+                        <div class="row">
+                    <div class="col-lg-12">
+                        @master.Narration
+                    </div>
+                </div>
+
+
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        @if (listPayment.Count == 0)
+                        {
+
+                        }
+                        else
+                        {
+                            <table class="table table-striped b-t">
+                                <thead>
+                                    <tr>
+                                        <th>Voucher No</th>
+                                        <th>Voucher Date</th>
+                                        <th>Payment Date</th>
+                                        <th class="text-right">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in listPayment)
+                                    {
+                                        <tr>
+                                            <td>@item.VoucherNo</td>
+                                            <td>@master.Date</td>
+                                            <td>@item.Date</td>
+                                            <td align="right">@item.CashAmount</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td align="right" colspan="3">Total</td>
+                                        <td align="right">
+                                            @paymentMade
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        }
+                    </div>
+                </div>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+	                </div>
+
+
+
+					@if (showPay)
+{
+
+   <div class="modal fade modal-success in" id="myModal" style="display:block" aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 style="margin-top:10px;" class="modal-title">Add Payment</h4>
+                    <button type="button" class="close" @onclick="@ModalCancelPay">&times;</button>
+                </div>
+
+                <div class="modal-body scroll-y" style="max-height:500px;">
+                    <div class="errorSection"></div>
+                    <div class="form-group row">
+                            <label for="customer_name" class="col-sm-4 col-form-label">Voucher No:<i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <input class="form-control" type="text" @bind="payment.VoucherNo" readonly>
+                        <input type="hidden" @bind="payment.SerialNo" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="customer_name" class="col-sm-4 col-form-label">Pay to Supplier:<i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <label class="form-control"> @master.LedgerName</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="customer_name" class="col-sm-4 col-form-label">Payment Date:<i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <input class="form-control" type="date" @bind="payment.Date" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="customer_name" class="col-sm-4 col-form-label">Payment Amount:<i class="text-danger">*</i></label>
+                            <div class="col-sm-6">
+                                <input class="form-control" type="number" @bind="payment.TotalAmount" />
+                            </div>
+                        </div>
+                    <table class="tabledetails">
+                        <tr>
+                            <td>
+                                Cash
+                            </td>
+                            <td>
+                                <select class="form-control" @bind="payment.CashId">
+                                    @foreach (var item in listCash)
+                                    {
+                                        <option value="@item.LedgerId">@item.LedgerName</option>
+                                    }
+
+                                </select>
+                            </td>
+                            <td>
+                                Amount
+
+                            </td>
+                            <td>
+                                <input type="number" @bind="payment.CashAmount" class="form-control" @onkeyup="@Calculate" @bind:event="oninput" autocomplete="off" />
+                            </td>
+                        </tr>
+                        <tr>
+                            
+                        </tr>
+                        <tr>
+                            <td>
+                                Bank / Cheque
+                            </td>
+                            <td>
+                                <select class="form-control" @bind="payment.BankId">
+                                    @foreach (var item in listBank)
+                                    {
+                                        <option value="@item.LedgerId">@item.LedgerName</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                Amount
+                            </td>
+                            <td>
+                                <input type="number" @bind="payment.BankAmount" class="form-control" @onkeyup="@Calculate" @bind:event="oninput" autocomplete="off" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Due Amount
+                            </td>
+                            <td>
+                                <input type="text" @bind="payment.CreditAmount" class="form-control" @onkeyup="@Calculate" @bind:event="oninput" autocomplete="off" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Description
+                            </td>
+                            <td>
+                                <input type="text" @bind="master.Narration" class="form-control" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn" @onclick="@ModalCancelPay">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="OnPay">Save</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+@code {
+    [Parameter]
+    public string id { get; set; }
+    InventorySetting setting = new InventorySetting();
+    InventorySetting settingPurchase = new InventorySetting();
+    PurchaseMasterView master = new PurchaseMasterView();
+    List<ProductView> TodoList = new List<ProductView>();
+    PaymentMaster payment = new PaymentMaster();
+    List<AccountLedger> listCash = new List<AccountLedger>();
+    List<AccountLedger> listBank = new List<AccountLedger>();
+    List<PaymentMaster> listPayment = new List<PaymentMaster>();
+    string billtype;
+    long decPurchaseInvoiceVoucherType = 13;
+    bool showPay = false;
+    bool showModal = false;
+    long decPaymenVoucherId = 4;
+    string strSerialNo;
+    string strPrefix;
+    string strSuffix;
+    decimal decTotal = 0;
+    decimal PreviousDue = 0;
+    decimal paymentMade = 0;
+    decimal balanceDue = 0;
+    Company companyView = new Company();
+
+    //SendMail
+    private string Message { get; set; } = "";
+
+    protected async override void OnInitialized()
+    {
+        settingPurchase = settingRepository.EditInventorySetting(decPurchaseInvoiceVoucherType);
+        companyView = company.Edit(1);
+        billtype = "Purchase Invoice";
+        LoadData();
+    }
+    private void LoadData()
+    {
+        master = purchaseInvoiceRepository.PrintPurchaseMasterView(Convert.ToInt64(id));
+        TodoList = purchaseInvoiceRepository.PurchaseInvoiceView(Convert.ToInt64(id));
+        LoadPaymentShow();
+    }
+    void ModalShow()
+    {
+        showModal = true;
+    }
+    void ModalShowPay()
+    {
+        payment.Date = DateTime.Now;
+        setting = settingRepository.EditInventorySetting(decPaymenVoucherId);
+        strPrefix = setting.Prefix;
+        strSuffix = setting.Suffix;
+        strSerialNo = paymentSupplier.GetPaymentVoucherNo(1, 1, decPaymenVoucherId);
+        payment.VoucherNo = strPrefix + strSerialNo + strSuffix;
+        payment.SerialNo = strSerialNo;
+        listCash = accountLedger.GetCashFill();
+        listBank = accountLedger.GetBankFill();
+        payment.CashId = 1;
+        payment.BankId = 13;
+        payment.TotalAmount = Math.Round(master.GrandTotal - paymentMade, 2);
+        payment.CashAmount = 0;
+        payment.BankAmount = 0;
+        payment.CreditAmount = 0;
+        payment.Narration = string.Empty;
+        showPay = true;
+    }
+    void ModalCancelPay()
+    {
+        showPay = false;
+    }
+    void OnPay()
+    {
+        if (master.LedgerId == 0)
+        {
+            Snackbar.Add("Choose Supplier.", Severity.Info);
+        }
+        else if (payment.VoucherNo == string.Empty)
+        {
+            Snackbar.Add("Type VoucherNo.", Severity.Info);
+        }
+        else
+        {
+            var isCheck = purchaseInvoiceRepository.CheckPymentSupplier(master.VoucherNo, 1, 1, decPaymenVoucherId);
+            if (isCheck == true)
+            {
+                Snackbar.Add("Voucher no already exists.", Severity.Info);
+            }
+            else
+            {
+                SqlConnection sqlcon = new SqlConnection(_conn.DbConn);
+                sqlcon.Open();
+                SqlTransaction sql = sqlcon.BeginTransaction();
+                decimal decCredit = payment.CashAmount + payment.BankAmount;
+
+                var paraLedger = new DynamicParameters();
+                paraLedger.Add("@SerialNo", strSerialNo);
+                paraLedger.Add("@Date", payment.Date);
+                paraLedger.Add("@NepaliDate", string.Empty);
+                paraLedger.Add("@LedgerId", master.LedgerId);
+                paraLedger.Add("@VoucherNo", payment.VoucherNo);
+                paraLedger.Add("@SuffixPrefixId", 0);
+                paraLedger.Add("@financialYearId", 1);
+                paraLedger.Add("@InvoiceNo", payment.VoucherNo);
+                paraLedger.Add("@VoucherTypeId", decPaymenVoucherId);
+                paraLedger.Add("@CompanyId", 1);
+                paraLedger.Add("@DetailsId", master.PurchaseMasterId);
+                paraLedger.Add("@CashAmount", payment.CashAmount);
+                paraLedger.Add("@BankAmount", payment.BankAmount);
+                paraLedger.Add("@CreditAmount", payment.CreditAmount);
+                paraLedger.Add("@TotalAmount", payment.TotalAmount);
+                paraLedger.Add("@Narration", payment.Narration);
+                paraLedger.Add("@UserId", 1);
+                paraLedger.Add("@CashId", payment.CashId);
+                paraLedger.Add("@BankId", payment.BankId);
+                paraLedger.Add("@Optional", "Payment");
+                paraLedger.Add("@AddedDate", DateTime.Now);
+                paraLedger.Add("@AddedBy", 1);
+                paraLedger.Add("@MemOUT", dbType: DbType.Int64, direction: ParameterDirection.Output);
+                sqlcon.Execute("PaymentMasterAdd", paraLedger, sql, 0, CommandType.StoredProcedure);
+                long MemID = paraLedger.Get<long>("MemOUT");
+                //UpdatePurchaseMaster
+                decimal decTotalDuess = master.GrandTotal;
+                decimal decPaymentAmount = payment.CashAmount + payment.BankAmount;
+                var para = new DynamicParameters();
+                para.Add("@PurchaseMasterId", master.PurchaseMasterId);
+                para.Add("@BalanceDue", payment.CreditAmount);
+                para.Add("@CashAmount", payment.CashAmount);
+                para.Add("@BankAmount", payment.BankAmount);
+                para.Add("@CreditAmount", payment.CreditAmount);
+                if (decTotalDuess == decPaymentAmount)
+                {
+                    para.Add("@Status", "Paid");
+                }
+                else if (decTotalDuess > decPaymentAmount)
+                {
+                    para.Add("@Status", "PartialPaid");
+                }
+                else
+                {
+                    para.Add("@Status", "Draft");
+                }
+                sqlcon.Execute("UPDATE PurchaseMaster SET BalanceDue=@BalanceDue,Status=@Status,CashAmount=@CashAmount,BankAmount=@BankAmount,CreditAmount=@CreditAmount where PurchaseMasterId=@PurchaseMasterId", para, sql, 0, CommandType.Text);
+
+                //LedgerPosting
+                //Supplier
+                decimal decSupplierAmount = payment.BankAmount + payment.CashAmount;
+                if (decSupplierAmount > 0)
+                {
+                    var paraSc = new DynamicParameters();
+                    paraSc.Add("@Date", payment.Date);
+                    paraSc.Add("@NepaliDate", string.Empty);
+                    paraSc.Add("@LedgerId", master.LedgerId);
+                    paraSc.Add("@Debit", decSupplierAmount);
+                    paraSc.Add("@Credit", 0);
+                    paraSc.Add("@VoucherNo", payment.VoucherNo);
+                    paraSc.Add("@DetailsId", master.PurchaseMasterId);
+                    paraSc.Add("@YearId", 1);
+                    paraSc.Add("@InvoiceNo", string.Empty);
+                    paraSc.Add("@VoucherTypeId", decPaymenVoucherId);
+                    paraSc.Add("@CompanyId", 1);
+                    paraSc.Add("@LongReference", payment.Narration);
+                    paraSc.Add("@ReferenceN", payment.Narration);
+                    paraSc.Add("@ChequeNo", string.Empty);
+                    paraSc.Add("@ChequeDate", string.Empty);
+                    paraSc.Add("@AddedDate", DateTime.Now);
+                    var valueSc = sqlcon.Query<long>("LedgerPostingInsert", paraSc, sql, true, 0, commandType: CommandType.StoredProcedure);
+                }
+
+                //Cash
+                if (payment.CashAmount > 0)
+                {
+                    var paraCash = new DynamicParameters();
+                    paraCash.Add("@Date", payment.Date);
+                    paraCash.Add("@NepaliDate", string.Empty);
+                    paraCash.Add("@LedgerId", payment.CashId);
+                    paraCash.Add("@Debit", 0);
+                    paraCash.Add("@Credit", payment.CashAmount);
+                    paraCash.Add("@VoucherNo", payment.VoucherNo);
+                    paraCash.Add("@DetailsId", master.PurchaseMasterId);
+                    paraCash.Add("@YearId", 1);
+                    paraCash.Add("@InvoiceNo", string.Empty);
+                    paraCash.Add("@VoucherTypeId", decPaymenVoucherId);
+                    paraCash.Add("@CompanyId", 1);
+                    paraCash.Add("@LongReference", payment.Narration);
+                    paraCash.Add("@ReferenceN", payment.Narration);
+                    paraCash.Add("@ChequeNo", string.Empty);
+                    paraCash.Add("@ChequeDate", string.Empty);
+                    paraCash.Add("@AddedDate", DateTime.Now);
+                    var valueCash = sqlcon.Query<long>("LedgerPostingInsert", paraCash, sql, true, 0, commandType: CommandType.StoredProcedure);
+                }
+                //Bank
+                if (payment.BankAmount > 0)
+                {
+                    var paraBank = new DynamicParameters();
+                    paraBank.Add("@Date", payment.Date);
+                    paraBank.Add("@NepaliDate", string.Empty);
+                    paraBank.Add("@LedgerId", payment.BankId);
+                    paraBank.Add("@Debit", 0);
+                    paraBank.Add("@Credit", payment.BankAmount);
+                    paraBank.Add("@VoucherNo", payment.VoucherNo);
+                    paraBank.Add("@DetailsId", master.PurchaseMasterId);
+                    paraBank.Add("@YearId", 1);
+                    paraBank.Add("@InvoiceNo", string.Empty);
+                    paraBank.Add("@VoucherTypeId", decPaymenVoucherId);
+                    paraBank.Add("@CompanyId", 1);
+                    paraBank.Add("@LongReference", master.Narration);
+                    paraBank.Add("@ReferenceN", master.Narration);
+                    paraBank.Add("@ChequeNo", string.Empty);
+                    paraBank.Add("@ChequeDate", string.Empty);
+                    paraBank.Add("@AddedDate", DateTime.Now);
+                    var valueBank = sqlcon.Query<long>("LedgerPostingInsert", paraBank, sql, true, 0, commandType: CommandType.StoredProcedure);
+                }
+                sql.Commit();
+                Snackbar.Add("Successfully Saved.", Severity.Info);
+                LoadData();
+                showPay = false;
+            }
+        }
+    }
+    void LoadPaymentShow()
+    {
+        PaymentMaster paymentmaster = new PaymentMaster();
+        decimal decTotalAmount = 0;
+        listPayment = purchaseInvoiceRepository.GetPaymentPurchaseView(master.PurchaseMasterId);
+        foreach (var item in listPayment)
+        {
+            decTotalAmount = decTotalAmount + item.CashAmount;
+        }
+        paymentMade = decTotalAmount;
+        balanceDue = master.GrandTotal - paymentMade;
+    }
+    void ModalCancel()
+    {
+        showModal = false;
+    }
+    void Calculate()
+    {
+        decimal totalAmount = payment.TotalAmount;
+        decimal CashAmount = payment.CashAmount;
+        decimal BankAmount = payment.BankAmount;
+        decimal creditAmount = payment.CreditAmount;
+        decimal decGrandTotal = CashAmount + BankAmount;
+        if (totalAmount >= decGrandTotal)
+        {
+            decimal decTotl = Math.Round(totalAmount - decGrandTotal, 2);
+            payment.CreditAmount = decTotl;
+        }
+        else
+        {
+            payment.CreditAmount = 0;
+            payment.CashAmount = 0;
+            payment.BankAmount = 0;
+        }
+    }
+    string convertImageToDisplay(byte[] image)
+    {
+        if (image != null)
+        {
+            var base64 = Convert.ToBase64String(image);
+            var finalStr = string.Format("data:image/jpg;base64,{0}", base64);
+            return finalStr;
+        }
+        return "";
+    }
+    private void SendEmail()
+    {
+        try
+        {
+            using(MailMessage mail = new MailMessage())
+            {
+                mail.From = new MailAddress("SaikPOSit00@gmail.com");
+                mail.To.Add("SaikPOSitsol@gmail.com");
+                mail.Subject = "Purchase Invoice";
+                mail.Body = "SuppllierName" + master.LedgerName+ "Total Amount" + master.GrandTotal;
+                mail.IsBodyHtml = true;
+                using(SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587))
+                {
+                    smtp.Credentials = new System.Net.NetworkCredential("SaikPOSit00@gmail.com.", "1234567890");
+                    smtp.EnableSsl = true;
+                    smtp.Send(mail);
+                    Message = "Mail Sent";
+                }
+
+            }
+        }
+        catch(Exception ex)
+        {
+            
+        }
+    }
+    private void Print()
+    {
+        JsRuntime.InvokeVoidAsync("Print");
+    }
+}

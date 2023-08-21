@@ -1,0 +1,114 @@
+﻿@page "/purchase/supplierpayshow/{id}"
+@inject ICompany icompany
+@inject IPurchaseInvoice purchaseInvoiceRepository
+@inject IPaymentSupplier _payment
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+<div class="content">
+                <ol class="breadcrumb">
+                <li><a href="#"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="#">purchase</a></li>
+                <li class="active">Purchase Details</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                    
+		<div class="row">
+		    <div class="col-sm-12">
+		        <div class="panel panel-bd lobidrag">
+		            <div class="panel-heading">
+		                <div class="panel-title">
+		                    <span>Purchase Details</span>
+							<span class="print-button">
+                                    @*<a href="/purchase/purchaseinvoiceedit/@id" class="btn btn-success">
+            <i class="fa  fa-edit"></i> Edit
+          </a>*@
+          <a onclick="printDiv('PrintDiv')" class="btn btn-warning">
+              <i class="fa fa-print"></i> 
+            Print
+          </a>
+          @*<a href="" target="_blank" class="btn btn-primary">
+              <i class="fa fa-file-pdf-o"></i> 
+            PDF
+          </a>*@
+          <a href="" target="_blank" class="btn btn-primary">
+              <i class="fa fa-credit-card"></i> 
+            Email
+          </a>
+          <a href="/" class="btn btn-danger">
+            <i class="fa  fa-undo"></i> Back to list
+          </a>
+                                 </span>
+		                </div>
+		            </div>
+		            <div class="panel-body" id="PrintDiv">
+		    
+           <div class="row purchasedetails-header">
+                                
+                                <div class="col-sm-7 purchasedetails-address">
+                                                                        <img src="img/logo.png" class="" alt="" height="70" width="80">
+                                    <br>  <br>
+                                      
+                                    <span class="label label-success-outline m-r-15 p-10">Billing From</span>
+                                    <address>
+                                        <strong class="companyname">@companyName</strong><br>
+                                        @address<br>
+                                        <abbr><b>Mobile:</b></abbr>@phone <br>
+                                        <abbr><b>Email:</b></abbr> 
+                                       SaikPOSapps@gmail.com <br>
+                                        <abbr><b>Website:</b></abbr> 
+                                       SaikPOSapps.com<br>
+                                                                                
+                                    </address>
+                                   
+                                  
+
+                                </div>
+                                
+                                 
+                                <div class="col-sm-4 text-left invoice-details-billing">
+                                    <h2 class="m-t-0">@billtype</h2>
+                                    <div>Voucher No: @master.VoucherNo</div>
+                                    <div class="m-b-15">Billing Date: @master.Date</div>
+                                    <div>Cash: @master.CashAmount</div>
+                                    <div>Bank: @master.BankAmount</div>
+                                    <div>Due: @master.CreditAmount</div>
+
+                                    <span class="label label-success-outline m-r-15">Billing To</span>
+
+                                    <address class="details-address">  
+                                        <strong class="companyname">@master.LedgerName </strong><br>
+                                       
+                                    </address>
+                                </div>
+                            </div> 
+
+                          <br>
+		            </div>
+		        </div>
+		    </div>
+		</div>
+	                </div>
+@code {
+    [Parameter]
+    public string id { get; set; }
+    PaymentSupplierView master = new PaymentSupplierView();
+    string companyName;
+    string address;
+    string phone;
+    string billtype;
+    protected async override void OnInitialized()
+    {
+        var resultCompany = icompany.Edit(1);
+        companyName = resultCompany.CompanyName;
+        address = resultCompany.Address;
+        phone = resultCompany.Phone;
+        billtype = "Payment Out";
+        master = _payment.PaymentSupplierView(Convert.ToInt64(id));
+        StateHasChanged();
+
+    }
+}

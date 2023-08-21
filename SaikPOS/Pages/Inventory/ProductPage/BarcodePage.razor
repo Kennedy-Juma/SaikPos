@@ -1,0 +1,83 @@
+﻿@page "/product/barcode/{id}"
+@inject IProduct product
+@using Net.ConnectCode.Barcode;
+<div class="content">
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Product</a></li>
+                <li class="active">Barcode Code</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+<div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <h4>Barcode Code</h4>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                            <div class="row">
+                            <div class="col-sm-12">
+                                <div class="table-responsive">
+                                                            <div id="PrintDiv">
+                                    <div class="paddin5ps">
+                                        @if(master == null)
+                                        {
+                                            
+                                        }
+                                        else
+                                        {
+                                        <table class="table-bordered barcode-collaps">
+                                                                                                                                  <tbody><tr><td class="barcode-toptd">  
+                                                    <div class="barcode-inner barcode-innerdiv">
+                                                        <div id="barcode">@master.ProductCode</div>
+<div id="barcode_text">@master.ProductName</div>
+                                                    </div>
+                                                </td>
+                                                                                                                                                                           
+                                            </tr>
+                                            </tbody>
+                                            </table>
+                                            }
+                                </div>
+                                </div>
+                                                        </div>
+                                
+                                </div>
+                                <div class="text-center">
+                                <a class="btn btn-info" style="cursor:pointer;" onclick="printDiv('PrintDiv')">Print</a>
+                                <a class="btn btn-danger" href="/product/productlist">Cancel</a>
+                            </div>
+                                </div>
+                                </div>
+                    </div>
+                    </div>
+                    </div>
+                    </div>
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+    Product master = new Product();
+    protected async override void OnInitialized()
+    {
+        master = product.Edit(Convert.ToInt64(id));
+        GenerateBarcode();
+        StateHasChanged();
+    }
+
+    void GenerateBarcode()
+    {
+        BarcodeFonts bcf = new BarcodeFonts();
+        bcf.BarcodeType = BarcodeFonts.BarcodeEnum.Code39;
+        bcf.CheckDigit = BarcodeFonts.YesNoEnum.Yes;
+        bcf.Data = master.PartNo;
+        bcf.encode();
+        master.PartNo = bcf.EncodedData;
+        master.ProductName = bcf.HumanText;
+    }
+}

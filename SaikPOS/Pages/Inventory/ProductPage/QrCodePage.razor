@@ -1,0 +1,89 @@
+﻿@page "/product/qrcode/{id}"
+@inject IProduct product
+@using QRCoder
+@using System.Drawing
+@using System.Drawing.Imaging
+@using System.IO
+<div class="content">
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Product</a></li>
+                <li class="active">QR Code</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+<div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <h4>QR Code</h4>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                            <div class="row">
+                            <div class="col-sm-12">
+                                <div class="table-responsive">
+                                                            <div id="PrintDiv">
+                                    <div class="paddin5ps">
+                                    <table class="table-bordered barcode-collaps">
+                                                                                                                                    <tbody><tr><td class="barcode-toptd">  
+                                                    <div class="barcode-inner barcode-innerdiv">
+                                                        <img src="@QRCodeStr" class="img-responsive center-block qrcode-image" alt="">
+                                                        <div class="product-name-details qrcode-productdetails">@master.ProductName</div>
+                                                        <div class="price barcode-price">@master.SalesRate 
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                                                                                                                                            </tr></tbody></table>
+                                </div>
+                                </div>
+                                                        </div>
+                                
+                                </div>
+                                <div class="text-center">
+                                <a class="btn btn-info" style="cursor:pointer;" onclick="printDiv('PrintDiv')">Print</a>
+                                <a class="btn btn-danger" href="/product/productlist">Cancel</a>
+                            </div>
+                                </div>
+                                </div>
+                    </div>
+                    </div>
+                    </div>
+                    </div>
+
+@code {
+    [Parameter]
+    public string id { get; set; }
+    Product master = new Product();
+    string InputText { get; set; } = "";
+    string QRCodeStr { get; set; } = "";
+    protected async override void OnInitialized()
+    {
+        master = product.Edit(Convert.ToInt64(id));
+        GenerateQRCode();
+        StateHasChanged();
+    }
+
+    public void GenerateQRCode()
+    {
+        QRCodeStr = "";
+        if(!string.IsNullOrEmpty(master.ProductName))
+        {
+            using(MemoryStream ms = new MemoryStream())
+            {
+                QRCodeGenerator oQRCodeGenerate = new QRCodeGenerator();
+                QRCodeData oQRCodeData = oQRCodeGenerate.CreateQrCode(master.ProductName, QRCodeGenerator.ECCLevel.Q);
+                QRCode oQRCode = new QRCode(oQRCodeData);
+                using(Bitmap oBitmap = oQRCode.GetGraphic(20))
+                {
+                    oBitmap.Save(ms,ImageFormat.Png);
+                    QRCodeStr = "data:image/png;base64," + Convert.ToBase64String(ms.ToArray());
+
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,111 @@
+﻿@page "/company/rolelist"
+@using Microsoft.AspNetCore.Identity;
+@inject IRole role
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+
+@*<PageTitle>Product / AreaList</PageTitle>*@
+<div class="content">
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Company</a></li>
+                <li class="active">Manage Role</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                    <div class="row">
+	<div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <span>Manage Role</span>
+                           <span class="padding-lefttitle">
+                                               </span>
+
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            @if(listModel == null)
+                        {
+                            
+                        }
+                        else
+                                    {
+                            <table id="dataTableExample3" class="table table-bordered table-striped table-hover">
+                                <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th class="text-center">Role Name</th>
+                        </tr>
+                                </thead>
+                                <tbody>
+                                    
+                                    @{
+                                    int sno = 0;
+                                }
+                                          @foreach(var item in listModel)
+                                          {
+                                        <tr>
+                                   <td>@{sno++;}
+                                            @sno</td>
+                                    <td class="text-center">@item.Name</td>
+                                    <td>
+                                    <center>
+                                     <a href="/company/roleedit/@item.Id" class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="left" title="" data-original-title="Update">
+                                         <i class="fa fa-pencil" aria-hidden="true"></i></a>
+                                                <a @onclick="() => Delete(item.Id)" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="right" title="" data-original-title="Delete "><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+                                                                                     
+                                    </center>
+                                    </td>
+                                    </tr>
+                                    }
+                                    </tbody>
+                            </table>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+</div>                </div>
+
+@code {
+    List<IdentityRole> listModel;
+    protected override void OnInitialized()
+    {
+        LoadData();
+    }
+    private async void LoadData()
+    {
+        listModel = role.ViewRole();
+    }
+    async Task Delete(string id)
+    {
+            bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+            if (confirmed)
+            {
+                if (id == "1")
+                {
+                    Snackbar.Add("Default data cannot be delete.", Severity.Info);
+                    
+                }
+                else
+                {
+                    bool isSave = false;
+                    isSave = role.Delete(id);
+                    if (isSave == true)
+                    {
+                        Snackbar.Add("Delete Successfully.", Severity.Success);
+                        LoadData();
+                    }
+                    else
+                    {
+                        Snackbar.Add("Cannot be delete. already in used.", Severity.Info);
+                    }
+                }
+            }
+    }
+}

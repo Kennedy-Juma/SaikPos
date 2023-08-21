@@ -1,0 +1,136 @@
+﻿@page "/account/journalvoucherlist"
+@inject IJournalVoucher voucher
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+
+@*<PageTitle>Purchase / PurchaseInvoice</PageTitle>*@
+<div class="content">
+
+
+
+       
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Account</a></li>
+                <li class="active">Manage JournalVoucher</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                   <div class="panel panel-default">
+		            <div class="panel-body">
+
+                        <div class="row">
+		            	<div class="col-sm-7">
+		             
+
+                            <a href="/account/journalvoucheradd" class="btn btn-primary m-b-5 m-r-2">Add JournalVoucher</a>
+                 </div>
+		           
+		        </div>
+                </div>
+		           
+		        </div> 			
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="panel panel-bd lobidrag">
+                            <div class="panel-body">
+		            	<div class="table-responsive">
+                            <MudTable Items="@listModel" Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Filter="new Func<JournlVoucherView,bool>(Search)">
+    <ToolBarContent>
+        <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Voucher No</MudTh>
+        <MudTh>Date</MudTh>
+        <MudTh>VoucherType</MudTh>
+        <MudTh>Amount</MudTh>
+        <MudTh>Narration</MudTh>
+        <MudTh>User</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="LedgerName">@context.VoucherNo</MudTd>
+        <MudTd DataLabel="LedgerCode">@context.Date</MudTd>
+        <MudTd DataLabel="Address">@context.VoucherTypeName</MudTd>
+        <MudTd DataLabel="Email">@context.TotalAmount</MudTd>
+        <MudTd DataLabel="Mobile">@context.Narration</MudTd>
+        <MudTd DataLabel="OpeningBalance">@context.UserId</MudTd>
+        <MudTd DataLabel="">
+            <a href="/account/journalvoucheredit/@context.JournalMasterId" class="btn btn-success btn-sm" data-toggle="tooltip" data-placement="left" title="" data-original-title="Journal Details"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+            <a @onclick="() => Delete(context.JournalMasterId)" class="btn btn-info btn-sm" data-toggle="tooltip" data-placement="left" title="Update"><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+                                                                                
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[] {10, 20, 50, 100}" />
+    </PagerContent>
+</MudTable>
+                        </div>
+		    </div>
+		    </div>
+                </div>
+                </div>
+                </div>
+@code {
+    private bool dense = true;
+    private bool hover = true;
+    private bool striped = true;
+    private bool bordered = true;
+    private string searchString1 = "";
+    private string searchString2 = "";
+    DateTime fromDate = DateTime.Now;
+    DateTime toDate = DateTime.Now;
+    List<JournlVoucherView> listModel = new List<JournlVoucherView>();
+    protected override void OnInitialized()
+    {
+        LoadData();
+    }
+    private async void LoadData()
+    {
+        listModel = voucher.ViewJouranlVoucherView(1, 1);
+        
+    }
+    async Task Delete(long id)
+    {
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+        if (confirmed)
+        {
+            bool isSave = false;
+            JournalMaster mster = new JournalMaster();
+           mster = voucher.EditJournalVoucher(Convert.ToInt64(id));
+                isSave = voucher.JournalVoucherDelete(mster.JournalMasterId, mster.VoucherNo, mster.VoucherTypeId, mster.FinancialYearId, mster.CompanyId);
+            if (isSave == true)
+            {
+                Snackbar.Add("Delete Successfully.", Severity.Success);
+                LoadData();
+            }
+            else
+            {
+                Snackbar.Add("Cannot be delete. already in used.", Severity.Info);
+            }
+        }
+    }
+    private bool Search(JournlVoucherView element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString1))
+            return true;
+        if (element.VoucherTypeName.Contains(searchString1, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.VoucherNo.Contains(searchString1, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+    string convertImageToDisplay(byte[] image)
+    {
+        if (image != null)
+        {
+            var base64 = Convert.ToBase64String(image);
+            var finalStr = string.Format("data:image/jpg;base64,{0}", base64);
+            return finalStr;
+        }
+        return "";
+    }
+}

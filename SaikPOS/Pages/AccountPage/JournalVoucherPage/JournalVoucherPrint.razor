@@ -1,0 +1,165 @@
+﻿@layout BlankLayout
+@page "/account/journalvoucherprint/{id}"
+@inject ICompany icompany
+@inject IJournalVoucher journalrepository
+@inject NavigationManager navManager
+
+<body onload="window.print()">
+    <section class="content">
+
+        <div class="box box-default">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="topheader">
+                            <div id="divprint">
+                                <div class="lefttablefull">
+                                    <span style="border-bottom:1px solid Blue; text-align:center;"></span>
+
+                                    <table id="table">
+                                        <tr>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                        <tr>
+                                            <td rowspan="5" style="width:50px;"></td>
+                                            <td style="width:100%; text-align:center;">
+                                                <span style="font-size:20px;">@companyName</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width:100%; text-align:center;">
+                                                <span style="font-size:15px;">@address</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width:100%; text-align:center;">
+                                                <span style="font-size:11px;">@phone</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width:100%; font-weight:bold; text-align:center;">
+                                                <span style="font-size:11px;">@billtype</span>
+                                            </td>
+                                        </tr>
+
+                                    </table>
+                                    @if (mster != null)
+                                    {
+                                        <table id="table" style="margin-top:20px;">
+
+                                            <tr>
+                                                <td style="width:400px;">
+                                                    Voucher No &nbsp; &nbsp;
+                                                    <span>@mster.VoucherNo</span>
+                                                </td>
+                                                <td style="width:400px;">
+                                                    Date &nbsp; &nbsp;
+                                                    <span>@mster.Date</span>
+                                                </td>
+                                            </tr>
+
+                                        </table>
+                                    }
+                                    <table id="table" style="margin-top:10px;">
+                                        <tr>
+                                            <td style="width:1200px; text-align:center;">
+                                                Journal Voucher &nbsp; &nbsp;
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <table id="table" width="100%" style="border:1px solid gray; margin-top:20px;">
+                                        <thead style="border:1px solid gray">
+                                            <tr>
+                                                <th>S.No</th>
+                                                <th>Particular</th>
+                                                <th>
+                                                    Debit
+                                                </th>
+                                                <th>
+                                                    Credit
+                                                </th>
+                                                <th>
+                                                    Narration
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @{
+                                                int sno = 0;
+                                            }
+                                            @if (TodoList != null)
+                                            {
+                                                foreach (var item in TodoList)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            @{sno++;}
+                                                            @sno
+                                                        </td>
+                                                        <td>@item.LedgerName</td>
+                                                        <td>@item.Debit</td>
+                                                        <td>@item.Credit</td>
+                                                        <td>@item.Description</td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                        <tfoot style="border:1px solid gray; font-weight:bold">
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                                <td>Total Amount</td>
+                                                <td><span>@mster.TotalAmount</span></td>
+                                                <td></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lastmenu">
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</body>
+@code
+{
+    [Parameter]
+    public string id { get; set; }
+    JournalMaster mster = new JournalMaster();
+    List<JournlDetilsView> TodoList = new List<JournlDetilsView>();
+    string companyName;
+    string address;
+    string phone;
+    string billtype;
+    protected async override void OnInitialized()
+    {
+        var resultCompany = icompany.Edit(1);
+        companyName = resultCompany.CompanyName;
+        address = resultCompany.Address;
+        phone = resultCompany.Phone;
+        billtype = "JournalVoucher";
+        mster = journalrepository.EditJournalVoucher(Convert.ToInt64(id));
+
+        if (mster != null)
+        {
+            TodoList = journalrepository.JournalVoucherPrint(Convert.ToInt64(id));
+        }
+        else
+        {
+            navManager.NavigateTo("/account/journalvoucherlist");
+        }
+    }
+}
+
+
+
+

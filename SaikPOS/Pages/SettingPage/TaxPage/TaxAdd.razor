@@ -1,0 +1,107 @@
+﻿@page "/product/taxadd"
+@inject ITax tax
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+@*<PageTitle>Product / TaxAdd</PageTitle>*@
+<div class="content">
+
+
+
+       
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Product</a></li>
+                <li class="active">Add Tax</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                     <div class="row">
+            <div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <h4>Add Tax </h4>
+                        </div>
+                    </div>
+                   
+                    <div class="panel-body">
+                            	<EditForm Model="@master" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Tax Name <i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="text" class="form-control" @bind="master.TaxName" placeholder="Tax Name">
+                                    <ValidationMessage For="@(() => master.TaxName)" />
+                                    
+                                </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Percentage(%) <i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="number" class="form-control" @bind="master.Rate" placeholder="Narration">
+                                    <ValidationMessage For="@(() => master.Rate)" />
+                                    
+                                </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="unit_name" class="col-sm-2 text-right col-form-label">Active <i class="text-danger"> * </i>:</label>
+                                    <div class="col-sm-4">
+                                        
+                                    <input type="checkbox" class="form-control" @bind="master.IsActive">
+                                    <ValidationMessage For="@(() => master.IsActive)" />
+                                    
+                                </div>
+                                </div>
+                         <div class="form-group row">
+                                   
+                                     <div class="col-sm-6 text-right">
+                                     <button type="submit" class="btn btn-success ">Save</button>
+                                      <button type="button" class="btn btn-danger" @onclick="@Cancel">Back to List</button>
+                                                    
+                                       
+                                       
+                                    </div>
+                                </div>
+                                </EditForm>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+               
+                </div>
+
+@code {
+    Tax master = new Tax();
+    protected async override void OnInitialized()
+    {
+        
+    }
+    public async Task HandleValidSubmit()
+    {
+            var isCheck = tax.CheckName(master.TaxName);
+            if (isCheck == true)
+            {
+                Snackbar.Add("Already Exists.", Severity.Info);
+            }
+            else
+            {
+                master.CompanyId = 1;
+                master.ApplicableOn = "Bill";
+                master.CalculatingMode = "Rate";
+                master.Narration = string.Empty;
+                master.AddedDate = DateTime.Now;
+                tax.Save(master);
+                Snackbar.Add("Saved Successfully.", Severity.Success);
+                navManager.NavigateTo("/product/taxlist");
+            }
+    }
+    void Cancel()
+    {
+        navManager.NavigateTo("/product/taxlist");
+    }
+    }

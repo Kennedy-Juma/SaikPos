@@ -1,0 +1,226 @@
+﻿@page "/product/productlist"
+@using NPOI.SS.UserModel
+@using NPOI.XSSF.UserModel
+@inject IProduct product
+@inject IJSRuntime JsRuntime
+@inject NavigationManager navManager
+@inject ISnackbar Snackbar
+
+@*<PageTitle>Product / Product</PageTitle>*@
+<div class="content">
+                <ol class="breadcrumb">
+                <li><a href="/"><i class="pe-7s-home"></i> Home</a></li>
+                <li><a href="/">Product</a></li>
+                <li class="active">Manage Product</li>
+            </ol>
+            
+                    <!-- load messages -->
+                                        <div class="se-pre-con" style="display: none;"></div>
+                    <!-- load custom page -->
+                    <div class="row">
+	<div class="col-sm-12">
+                <div class="panel panel-bd lobidrag">
+                    <div class="panel-heading">
+                        <div class="panel-title">
+                            <span>Manage Product</span>
+                           <span class="padding-lefttitle">
+                               <button class="btn btn-info" @onclick="GeneratePdf"><i class="i-File-TXT"></i> PDF
+        </button>
+        <button type="button" @onclick="@(async ()=> {await GenerateExcel();})" class="btn btn-info"><i class="i-File-Excel"></i> EXCEL
+        </button>
+                            <a href="/product/productadd" class="btn btn-primary"><i class="ti-plus"> </i>  Add Product </a>
+                                               </span>
+
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <MudTable Items="@listModel" Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Filter="new Func<ProductView,bool>(Search)">
+    <ToolBarContent>
+        <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Cover</MudTh>
+        <MudTh>Code</MudTh>
+        <MudTh>Product Name</MudTh>
+        <MudTh>Group</MudTh>
+        <MudTh>Unit</MudTh>
+        <MudTh>Purchase Rate</MudTh>
+        <MudTh>Sales Rate</MudTh>
+        <MudTh>Mrp</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="LogoPath">
+                                    @if (context.LogoPath == string.Empty)
+                        {
+                                        <img src="img/customer.png" width="40" height="40" />
+                        }
+                        else
+                        {
+                <img width="60px" height="60px" src="@context.LogoPath" />
+                        }
+            </MudTd>
+        <MudTd DataLabel="LedgerName">@context.ProductCode</MudTd>
+        <MudTd DataLabel="LedgerCode">@context.ProductName</MudTd>
+        <MudTd DataLabel="AccountGroupName">@context.GroupName</MudTd>
+        <MudTd DataLabel="Address">@context.UnitName</MudTd>
+        <MudTd DataLabel="Email">@context.PurchaseRate</MudTd>
+        <MudTd DataLabel="Mobile">@context.SalesRate</MudTd>
+        <MudTd DataLabel="OpeningBalance">@context.Mrp</MudTd>
+        <MudTd DataLabel="">
+            <center>
+                <a href="/product/qrcode/@context.ProductId" class="btn btn-success btn-xs" data-toggle="tooltip" data-placement="left" title="Qr-Code" data-original-title="Qr-Code" aria-describedby="tooltip809767"><i class="fa fa-qrcode" aria-hidden="true"></i></a>
+                <a href="/product/barcode/@context.ProductId" class="btn btn-warning btn-xs" data-toggle="tooltip" data-placement="left" title="Barcode" data-original-title="Barcode" aria-describedby="tooltip269932"><i class="fa fa-barcode" aria-hidden="true"></i></a>
+                                     <a href="/product/productedit/@context.ProductId" class="btn btn-success btn-xs" data-toggle="tooltip" data-placement="left" title="Edit" data-original-title="Edit">
+                                         <i class="fa fa-pencil" aria-hidden="true"></i></a>
+                                          <a @onclick="() => Delete(context.ProductId)" class="btn btn-success btn-xs" data-toggle="tooltip" data-placement="right" title="Delete" data-original-title="Delete "><i class="fa fa-trash-o" aria-hidden="true"></i></a>
+                                    </center>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[] {10, 20, 50, 100}" />
+    </PagerContent>
+</MudTable>
+                        </div>
+                    </div>
+                </div>
+            </div>
+</div>                </div>
+
+@code {
+    private bool dense = true;
+    private bool hover = true;
+    private bool striped = true;
+    private bool bordered = true;
+    private string searchString1 = "";
+    private string searchString2 = "";
+    List<ProductView> listModel;
+    protected override void OnInitialized()
+    {
+        LoadData();
+    }
+    private async void LoadData()
+    {
+        listModel = product.ViewAllProduct(1);
+    }
+    async Task Delete(long id)
+    {
+            bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?");
+            if (confirmed)
+            {
+                if (id != 1)
+                {
+                    bool isSave = false;
+                    isSave = product.Delete(id);
+                    if (isSave == true)
+                    {
+                        Snackbar.Add("Delete Successfully.", Severity.Success);
+                        LoadData();
+                    }
+                    else
+                    {
+                        Snackbar.Add("Cannot be delete. already in used.", Severity.Info);
+                    }
+                }
+                else
+                {
+                    Snackbar.Add("Default data cannot be delete.", Severity.Info);
+                }
+            }
+    }
+    private bool Search(ProductView element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString1))
+            return true;
+        if (element.ProductName.Contains(searchString1, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.ProductCode.Contains(searchString1, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+    protected async Task GenerateExcel()
+    {
+        IWorkbook workbook = new XSSFWorkbook();
+        var dataFormat = workbook.CreateDataFormat();
+        var dataStyle = workbook.CreateCellStyle();
+        dataStyle.DataFormat = dataFormat.GetFormat("MM/yy/dddd HH:mm:ss");
+        ISheet worksheet = workbook.CreateSheet("Sheet1");
+
+
+
+        int rowNumber1 = 0;
+        IRow row1 = worksheet.CreateRow(rowNumber1++);
+        //TbleHeder
+        ICell cell1 = row1.CreateCell(3);
+        cell1.SetCellValue("ProductList");
+
+        int rowNumber = 1;
+        IRow row = worksheet.CreateRow(rowNumber++);
+        //TbleHeder
+        ICell cell = row.CreateCell(0);
+        cell.SetCellValue("Code");
+
+        cell = row.CreateCell(1);
+        cell.SetCellValue("Product");
+
+        cell = row.CreateCell(2);
+        cell.SetCellValue("Group");
+
+        cell = row.CreateCell(3);
+        cell.SetCellValue("Unit");
+
+        cell = row.CreateCell(4);
+        cell.SetCellValue("Purchase Rate");
+
+        cell = row.CreateCell(5);
+        cell.SetCellValue("Sales Rate");
+
+        cell = row.CreateCell(6);
+        cell.SetCellValue("Mrp");
+
+
+        //Tble Body
+        foreach (var objDue in listModel)
+    {
+            row = worksheet.CreateRow(rowNumber++);
+
+            cell = row.CreateCell(0);
+            cell.SetCellValue(objDue.ProductCode);
+
+            cell = row.CreateCell(1);
+            cell.SetCellValue(objDue.ProductName);
+
+            cell = row.CreateCell(2);
+            cell.SetCellValue(objDue.GroupName);
+
+            cell = row.CreateCell(3);
+            cell.SetCellValue(objDue.UnitName);
+
+            cell = row.CreateCell(4);
+            cell.SetCellValue(objDue.PurchaseRate.ToString());
+
+            cell = row.CreateCell(5);
+            cell.SetCellValue(objDue.SalesRate.ToString());
+
+            cell = row.CreateCell(6);
+            cell.SetCellValue(objDue.Mrp.ToString());
+
+        }
+        MemoryStream ms = new MemoryStream();
+        workbook.Write(ms);
+        byte[] bytes = ms.ToArray();
+        ms.Close();
+
+        await JsRuntime.SaveAsFileAsync("ProductList", bytes, "application/vnd.ms-excel");
+    }
+    private void GeneratePdf()
+    {
+        PdfProduct pdfExp = new PdfProduct();
+        JsRuntime.InvokeAsync<ProductView>(
+            "saveAsFile",
+            "ProductList.pdf",
+            Convert.ToBase64String(pdfExp.Report(listModel))
+        );
+    }
+}
